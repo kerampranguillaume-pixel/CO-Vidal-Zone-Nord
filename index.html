@@ -1,0 +1,1244 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#16502E">
+<meta name="description" content="Course d'orientation en EPS : parcours générés sur la carte, groupes, chronos, correction des poinçons, suivi et évaluation.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CO Vidal">
+<script src="firebase-config.js"></script>
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Orientation Vidal-Mondélice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout : appli mobile d'abord — bandeau Guyane en tête, contenu en une colonne, barre d'onglets en bas ; tablette = grilles de cartes */
+:root{
+  --bg:#F3F6EE; --surface:#FFFFFF; --surface-2:#E8EEDF; --line:#D3DCC6;
+  --fg:#16241A; --muted:#5B6B5E;
+  --forest:#16502E; --leaf:#2F8F46; --sun:#F2B705; --sun-ink:#5A4300; --red:#C8261E; --red-soft:#FBE3E1;
+  --ok:#2F8F46; --ok-soft:#E0F2E4; --ko:#C8261E; --warn:#B07B00; --warn-soft:#FDF1CC;
+  --route:#C8261E; --jag-a:#E9B64A; --jag-b:#2A1C0E;
+  --f-display:"Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1912; --surface:#15241A; --surface-2:#1C2F22; --line:#2A4232;
+  --fg:#E7EFE4; --muted:#9DB09F;
+  --forest:#7FD08F; --leaf:#5CC274; --sun:#F5C531; --sun-ink:#F5C531; --red:#FF6B5E; --red-soft:#3A1A17;
+  --ok:#5CC274; --ok-soft:#1D3A25; --ko:#FF6B5E; --warn:#F5C531; --warn-soft:#3A3010;
+  --route:#FF4A3D; --jag-a:#8C6420; --jag-b:#120C05; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1912; --surface:#15241A; --surface-2:#1C2F22; --line:#2A4232;
+  --fg:#E7EFE4; --muted:#9DB09F;
+  --forest:#7FD08F; --leaf:#5CC274; --sun:#F5C531; --sun-ink:#F5C531; --red:#FF6B5E; --red-soft:#3A1A17;
+  --ok:#5CC274; --ok-soft:#1D3A25; --ko:#FF6B5E; --warn:#F5C531; --warn-soft:#3A3010;
+  --route:#FF4A3D; --jag-a:#8C6420; --jag-b:#120C05; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.1}
+.app{min-height:100%;display:flex;flex-direction:column;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+
+/* ---- bandeau ---- */
+.top{position:relative;overflow:hidden;background:var(--forest);color:#F3F6EE;padding-block:18px 0}
+:root[data-theme="dark"] .top{color:#0E1912}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .top{color:#0E1912}}
+.top-in{position:relative;z-index:2;max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:0 16px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.brand small{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.8;font-weight:600}
+.brand h1{font-size:clamp(22px,5.4vw,32px);font-weight:800;letter-spacing:-.01em}
+.brand h1 span{color:var(--sun)}
+:root[data-theme="dark"] .brand h1 span{color:#7A4E00}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .brand h1 span{color:#7A4E00}}
+.jaguar{height:12px;background-color:var(--jag-a);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='24' viewBox='0 0 44 24'%3E%3Cg fill='none' stroke='%232A1C0E' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M5 6a4 4 0 0 1 6-1M12 9a4 4 0 0 1-5 3'/%3E%3Cpath d='M27 14a4.5 4.5 0 0 1 7-1M35 17a4 4 0 0 1-6 3'/%3E%3C/g%3E%3Cg fill='%232A1C0E'%3E%3Ccircle cx='8.5' cy='8.5' r='1.3'/%3E%3Ccircle cx='31' cy='16.5' r='1.3'/%3E%3Ccircle cx='20' cy='4' r='1.4'/%3E%3Ccircle cx='40' cy='5' r='1.1'/%3E%3Ccircle cx='18' cy='20' r='1.1'/%3E%3C/g%3E%3C/svg%3E");background-size:44px 24px;position:relative;z-index:2}
+.flora{position:absolute;inset:0;z-index:1;pointer-events:none}
+.flora svg{position:absolute}
+.sync{font-size:12px;display:flex;align-items:center;gap:6px;white-space:nowrap;background:rgba(0,0,0,.18);border:0;border-radius:999px;padding:6px 11px;color:inherit;cursor:pointer;font-weight:600}
+.sync:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--sun);display:inline-block}
+
+/* ---- contenu ---- */
+main{flex:1;width:100%;max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 24px;display:flex;flex-direction:column;gap:18px}
+.sec-h{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sec-h h2{font-size:24px;font-weight:800}
+.sec-h p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.grow{flex:1;min-width:0}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.empty{border:1.5px dashed var(--line);border-radius:var(--r);padding:22px 16px;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center}
+.empty b{color:var(--fg);font-family:var(--f-display);font-size:18px}
+
+.btn{border:0;border-radius:11px;padding:11px 16px;font-weight:700;cursor:pointer;background:var(--surface-2);color:var(--fg);display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;transition:transform .08s ease, filter .15s}
+.btn:active{transform:scale(.97)}
+.btn:focus-visible,.chip-btn:focus-visible,.tab:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.btn.primary{background:var(--forest);color:var(--bg)}
+.btn.go{background:var(--leaf);color:#fff}
+.btn.stop{background:var(--red);color:#fff}
+.btn.sun{background:var(--sun);color:#2A1C0E}
+.btn.ghost{background:transparent;border:1.5px solid var(--line)}
+.btn.sm{min-height:36px;padding:7px 12px;font-size:14px;border-radius:9px}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+input[type=text],input[type=email],input[type=password],input[type=number],select,textarea{background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px;width:100%}
+textarea{min-height:120px;resize:vertical;font-family:var(--f-mono);font-size:13px}
+label.f{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:14px}
+
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.pill.wait{background:var(--surface-2);color:var(--muted)}
+.pill.run{background:var(--warn-soft);color:var(--warn)}
+.pill.arr{background:var(--red-soft);color:var(--red)}
+.pill.done{background:var(--ok-soft);color:var(--ok)}
+.pill i{width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.run i{animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion: reduce){.pill.run i{animation:none}.btn{transition:none}}
+
+/* vue globale */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.kpi b{display:block;font-family:var(--f-display);font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.kpi span{font-size:12px;color:var(--muted);font-weight:600}
+@media (max-width:420px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.gcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;min-width:0}
+.gcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--line)}
+.gcard[data-st="course"]::before{background:var(--sun)}
+.gcard[data-st="arrive"]::before{background:var(--red)}
+.gcard[data-st="fini"]::before{background:var(--leaf)}
+.gname{font-family:var(--f-display);font-weight:800;font-size:18px}
+.gstud{font-size:13.5px;color:var(--muted)}
+.chrono{font-family:var(--f-mono);font-weight:700;font-size:34px;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1}
+.chrono.idle{color:var(--muted)}
+.chrono.warn{color:var(--warn)}
+.chrono.over{color:var(--red)}
+.cible{font-size:12.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.cible.over{color:var(--red)}
+/* évaluation */
+.evgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+.evcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.evhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.evhead .gname{font-size:17px}
+.note20{font-family:var(--f-display);font-weight:800;font-size:30px;line-height:1;font-variant-numeric:tabular-nums;text-align:right}
+.note20 small{font-size:14px;color:var(--muted);font-weight:600}
+.rub{display:flex;flex-direction:column;gap:6px;padding-top:8px;border-top:1px solid var(--line)}
+.rub-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-weight:700;font-size:13.5px}
+.rub-h b{font-variant-numeric:tabular-nums;font-family:var(--f-display);font-size:15px}
+.rub-d{font-size:12.5px;color:var(--muted)}
+.lv{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.lv button{border:1.5px solid var(--line);background:var(--bg);border-radius:8px;min-height:38px;font-weight:800;font-size:12.5px;cursor:pointer;padding:2px}
+.lv button:focus-visible{outline:3px solid var(--sun);outline-offset:1px}
+.lv button.on[data-l="1"]{background:var(--red);border-color:var(--red);color:#fff}
+.lv button.on[data-l="2"]{background:var(--sun);border-color:var(--sun);color:#2A1C0E}
+.lv button.on[data-l="3"]{background:var(--leaf);border-color:var(--leaf);color:#fff}
+.lv button.on[data-l="4"]{background:var(--forest);border-color:var(--forest);color:var(--bg)}
+.lvl{display:inline-flex;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:800;white-space:nowrap}
+.lvl[data-l="0"]{background:var(--surface-2);color:var(--muted)}
+.lvl[data-l="1"]{background:var(--red-soft);color:var(--red)}
+.lvl[data-l="2"]{background:var(--warn-soft);color:var(--warn)}
+.lvl[data-l="3"]{background:var(--ok-soft);color:var(--ok)}
+.lvl[data-l="4"]{background:var(--forest);color:var(--bg)}
+.seslist{display:flex;gap:6px;flex-wrap:wrap}
+.seslist span{font-size:11.5px;background:var(--surface-2);border-radius:7px;padding:2px 7px;font-variant-numeric:tabular-nums}
+.seslist span.kept{background:var(--ok-soft);color:var(--ok);font-weight:700}
+.scale td{white-space:normal;min-width:150px;vertical-align:top;font-size:13px}
+.scale td:first-child{min-width:120px;font-weight:700}
+details.panel>summary{cursor:pointer;font-weight:700;list-style-position:inside}
+.runline{font-size:13.5px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.hist{display:flex;gap:6px;flex-wrap:wrap}
+.hist .h{font-size:12px;background:var(--surface-2);border-radius:8px;padding:3px 8px;font-variant-numeric:tabular-nums}
+.gact{display:flex;gap:8px;flex-wrap:wrap}
+.gact .btn{flex:1;min-width:120px}
+
+/* carte */
+.map{position:relative;width:100%;max-width:560px;margin:0 auto;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#cfe9c3;aspect-ratio:826/1106}
+.map img{display:block;width:100%;height:100%;max-width:100%}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.map.pick{cursor:crosshair}
+.legs{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.leg{display:grid;grid-template-columns:34px 58px 1fr auto;gap:10px;align-items:center;padding:9px 12px;border-top:1px solid var(--line);background:var(--surface)}
+.leg:first-child{border-top:0}
+.ord{width:28px;height:28px;border-radius:50%;border:2.5px solid var(--route);color:var(--route);display:grid;place-items:center;font-weight:800;font-size:13px;font-family:var(--f-display)}
+.leg .meta{font-size:12.5px;color:var(--muted)}
+.leg .num{font-weight:700}
+.schema{display:grid;place-items:center;background:#fff;border:1.5px solid var(--line);border-radius:10px;width:58px;height:58px;padding:5px;flex:none}
+.schema svg{width:100%;height:100%;display:block}
+.schema.none{background:var(--surface-2);color:var(--muted);font-size:10.5px;font-weight:700;text-align:center;line-height:1.15;border-style:dashed}
+.schema-btn{cursor:pointer;width:46px;height:46px;padding:4px}
+.schema-btn:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.schema-big{width:120px;height:120px;padding:12px;border-radius:14px}
+.sgrid{display:grid;grid-template-columns:repeat(9,1fr);gap:2px;width:100%;max-width:324px;margin:0 auto;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px}
+.sgrid button{aspect-ratio:1;border:0;background:transparent;border-radius:50%;cursor:pointer;display:grid;place-items:center;padding:0;min-width:0}
+.sgrid button::after{content:"";width:22%;height:22%;border-radius:50%;background:#C9D3C0}
+.sgrid button.whole::after{width:30%;height:30%;background:#A9B6A0}
+.sgrid button.on::after{width:78%;height:78%;background:#16241A}
+.sgrid button:focus-visible{outline:2px solid var(--sun)}
+@media (max-width:420px){.leg{grid-template-columns:30px 50px 1fr auto;gap:8px;padding:9px 10px}.leg .schema{width:50px;height:50px}.ord{width:26px;height:26px}}
+.vbtns{display:flex;gap:6px}
+.chip-btn{width:42px;height:42px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);cursor:pointer;font-weight:800;font-size:18px;display:grid;place-items:center}
+.chip-btn.on-ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.chip-btn.on-ko{background:var(--ko);border-color:var(--ko);color:#fff}
+
+/* assistant */
+.steps{display:flex;gap:6px}
+.steps span{flex:1;height:5px;border-radius:3px;background:var(--surface-2)}
+.steps span.on{background:var(--leaf)}
+.stepper{display:flex;align-items:center;justify-content:center;gap:18px}
+.stepper output{font-family:var(--f-display);font-weight:800;font-size:64px;min-width:2ch;text-align:center;font-variant-numeric:tabular-nums;line-height:1}
+.stepper .btn{width:56px;height:56px;font-size:26px;border-radius:50%}
+.diffs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.diff{border:2px solid var(--line);border-radius:12px;padding:12px 10px;cursor:pointer;background:var(--surface);text-align:left;display:flex;flex-direction:column;gap:6px;min-height:118px}
+.diff b{font-family:var(--f-display);font-size:17px}
+.diff small{color:var(--muted);font-size:12.5px;line-height:1.3}
+.diff .dots{display:flex;gap:4px}
+.diff .dots i{width:10px;height:10px;border-radius:50%;background:var(--surface-2)}
+.diff[data-d="1"] .dots i:nth-child(-n+1){background:var(--leaf)}
+.diff[data-d="2"] .dots i:nth-child(-n+2){background:var(--sun)}
+.diff[data-d="3"] .dots i:nth-child(-n+3){background:var(--red)}
+.diff.sel{border-color:var(--forest);background:var(--surface-2)}
+@media (max-width:420px){.diffs{grid-template-columns:1fr}.diff{min-height:0}}
+.stats3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stats3 div{background:var(--surface-2);border-radius:10px;padding:8px 10px}
+.stats3 b{display:block;font-family:var(--f-display);font-size:20px;font-variant-numeric:tabular-nums}
+.stats3 span{font-size:12px;color:var(--muted)}
+
+/* tableaux */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle;white-space:nowrap}
+th{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);position:sticky;top:0}
+td input[type=text]{min-height:36px;padding:6px 8px;min-width:90px}
+td select{min-height:36px;padding:4px 8px;width:auto}
+td.n{font-variant-numeric:tabular-nums}
+tr.off td{opacity:.5}
+
+/* onglets */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs-in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
+.tab{border:0;background:none;padding:9px 1px 10px;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:700;color:var(--muted);cursor:pointer}
+.tab svg{width:24px;height:24px}
+.tab.on{color:var(--forest)}
+.tab.on svg{stroke:var(--forest)}
+
+/* modale */
+.modal{position:fixed;inset:0;z-index:40;background:rgba(10,20,12,.55);display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:640px;max-height:92%;overflow:auto;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+@media (min-width:700px){.modal{align-items:center}.sheet{border-radius:20px;max-height:88%}}
+.sheet-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.sheet-h h3{font-size:21px;font-weight:800}
+.x{border:0;background:var(--surface-2);width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:18px;flex:none}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;z-index:60;font-size:14px;max-width:calc(100% - 32px)}
+.note{background:var(--warn-soft);color:var(--fg);border-radius:12px;padding:10px 12px;font-size:13.5px}
+.cols2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:820px){.cols2{grid-template-columns:1fr}}
+.glist{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.glist div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13.5px}
+.glist b{font-family:var(--f-display)}
+/* postes du parcours sur la carte de groupe */
+.postes{display:flex;flex-wrap:wrap;gap:6px}
+.poste{display:inline-flex;align-items:baseline;gap:3px;border:2px solid var(--route);border-radius:999px;padding:2px 10px 2px 8px;font-family:var(--f-display);font-weight:800;font-size:17px;font-variant-numeric:tabular-nums;background:var(--surface);color:var(--fg);line-height:1.25}
+.poste small{font-family:var(--f-body);font-size:10.5px;font-weight:700;color:var(--muted)}
+.poste.ok{border-color:var(--ok);background:var(--ok-soft)}
+.poste.ko{border-color:var(--ko);background:var(--red-soft)}
+/* composition des groupes */
+.geditor{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.gbox{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:86px;min-width:0}
+.gbox.pool{background:var(--surface-2)}
+.gbox.target{border:2px dashed var(--leaf);cursor:pointer}
+.gbox.target:hover{background:var(--ok-soft)}
+.gbox:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.gbox-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-family:var(--f-display);font-weight:800;font-size:15px}
+.gbox-h span{font-family:var(--f-body);font-weight:600;font-size:12px;color:var(--muted)}
+.stus{display:flex;flex-wrap:wrap;gap:6px}
+.stu{border:1.5px solid var(--line);background:var(--bg);border-radius:999px;padding:5px 12px;font-weight:600;font-size:14px;cursor:pointer;min-height:36px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stu.sel{background:var(--sun);border-color:var(--sun);color:#2A1C0E}
+.stu:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.addg{border:1.5px dashed var(--line);background:transparent;border-radius:12px;min-height:86px;font-weight:700;color:var(--muted);cursor:pointer}
+</style>
+</head>
+<body>
+
+
+<div class="app">
+  <header class="top">
+    <div class="flora" aria-hidden="true">
+      <svg width="170" height="150" viewBox="0 0 170 150" style="right:-18px;top:-22px;opacity:.9">
+        <g fill="none" stroke="#2F8F46" stroke-width="5" stroke-linecap="round">
+          <path d="M120 150 C118 110 112 80 104 52"/>
+        </g>
+        <g fill="#2F8F46">
+          <path d="M104 52 C80 30 52 28 20 44 C52 40 78 44 104 56Z"/>
+          <path d="M104 52 C92 20 70 4 40 0 C66 14 86 30 102 56Z"/>
+          <path d="M104 52 C112 18 132 2 160 0 C138 14 120 32 106 56Z"/>
+          <path d="M104 52 C130 34 156 36 172 52 C148 46 126 48 106 58Z"/>
+          <path d="M104 52 C96 70 84 92 70 104 C88 90 100 76 108 58Z"/>
+        </g>
+      </svg>
+      <svg width="130" height="120" viewBox="0 0 130 120" style="right:110px;top:18px;opacity:.55">
+        <path fill="#F2B705" d="M65 112 C20 108 2 72 8 44 C14 16 42 2 66 6 C94 10 122 30 122 62 C122 92 98 114 65 112Z"/>
+        <g stroke="#16502E" stroke-width="6" stroke-linecap="round">
+          <path d="M65 112 L64 10"/>
+          <path d="M64 40 L20 26"/><path d="M64 58 L10 58"/><path d="M64 78 L18 92"/>
+          <path d="M65 40 L110 28"/><path d="M65 60 L122 60"/><path d="M65 80 L108 98"/>
+        </g>
+        <g fill="#16502E"><circle cx="40" cy="44" r="4"/><circle cx="90" cy="46" r="4"/><circle cx="38" cy="74" r="4"/><circle cx="92" cy="76" r="4"/></g>
+      </svg>
+    </div>
+    <div class="top-in">
+      <div class="brand">
+        <small>EPS · Course d'orientation</small>
+        <h1>Vidal-<span>Mondélice</span></h1>
+      </div>
+      <button class="sync" id="sync" data-act="compte" aria-label="Compte, synchronisation et sauvegarde"><i></i><span>Connexion…</span></button>
+    </div>
+    <div class="jaguar"></div>
+  </header>
+
+  <main id="main"></main>
+
+  <nav class="tabs" aria-label="Sections">
+    <div class="tabs-in" id="tabs"></div>
+  </nav>
+</div>
+<div id="modal-root"></div>
+
+<script>
+/* ================= Données de la carte (Zone Nord) ================= */
+const MAP_W = 826, MAP_H = 1106;
+const M_PER_PX = 50/151;           // échelle mesurée : 50 m = 151 px
+const GEO = { // centre des cercles de contrôle sur la carte
+  2:[518,756],3:[225,761],4:[292,960],5:[248,468],6:[517,899],7:[387,614],8:[148,500],9:[488,379],
+  10:[449,1012],11:[684,137],12:[674,181],13:[179,602],14:[257,989],15:[96,937],20:[114,1011],
+  23:[581,296],25:[284,387],27:[280,633],28:[623,210],30:[165,465],36:[475,878],39:[442,525],
+  45:[162,928],46:[334,410],47:[498,335],54:[428,700],67:[443,417]
+};
+const DEFAULT_DEPART = {x:205,y:948};
+const DIFF = {1:{nom:"Facile",txt:"Balises proches, sur les chemins et repères visibles."},
+              2:{nom:"Moyen",txt:"Distances moyennes, quelques postes hors chemin."},
+              3:{nom:"Difficile",txt:"Longues distances, postes isolés avec peu de repères."}};
+
+/* ================= Stockage ================= */
+/* Deux modes :
+   - "cloud" : Firebase (connexion + Firestore). Les données sont gardées sur l'appareil
+     et synchronisées automatiquement dès qu'internet revient.
+   - "local" : aucun Firebase configuré → tout reste sur cet appareil. */
+const COLS = ["balises","classes","seances","config","evals"];
+const S = {balises:{}, classes:[], seances:[], config:{}, evals:{}};
+let DB = null, MODE = "init";
+const LOCAL_KEY = "co-vidal-local-v1";
+const FB_VERSION = "10.14.1";
+const AUTH = {user:null, ready:false, busy:false, err:"", info:"", view:"login"};
+let unsubs = [], pending = 0, seeded = false, deferredInstall = null;
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function clone(o){return JSON.parse(JSON.stringify(o))}
+
+const Local = {
+  data:null,
+  load(){ if(this.data) return; try{ this.data = JSON.parse(localStorage.getItem(LOCAL_KEY)) || {} }catch(e){ this.data = {} } COLS.forEach(c=>{ this.data[c] = this.data[c] || {} }) },
+  save(){ try{ localStorage.setItem(LOCAL_KEY, JSON.stringify(this.data)) }catch(e){ toast("Mémoire de l'appareil pleine : fais une sauvegarde puis supprime d'anciennes séances.") } },
+};
+
+function ingest(col, docs){
+  if(col==="balises"){ S.balises = {}; docs.forEach(d=>{ if(d.num!=null) S.balises[d.num] = d }) }
+  else if(col==="config"){ S.config = (docs.find(d=>d.id==="app")) || {} }
+  else if(col==="classes"){ S.classes = docs.sort((a,b)=>(a.nom||"").localeCompare(b.nom||"","fr")) }
+  else if(col==="seances"){ S.seances = docs.sort((a,b)=>(b.date||0)-(a.date||0)) }
+  else if(col==="evals"){ S.evals = {}; docs.forEach(d=>{ S.evals[d.id] = d }) }
+}
+function ingestLocal(col){ ingest(col, Object.entries(Local.data[col]).map(([k,v])=>({id:k,...v}))) }
+
+/* En mode cloud, on n'attend jamais le serveur : l'écriture est appliquée tout de suite
+   sur l'appareil, et Firestore l'envoie dès que la connexion le permet. */
+function track(p){
+  pending++; updateSync();
+  p.catch(e=>{ console.error(e); toast(e && e.code==="permission-denied" ? "Accès refusé par le serveur : reconnecte-toi." : "Une modification n'a pas pu être envoyée.") })
+   .finally(()=>{ pending = Math.max(0, pending-1); updateSync() });
+}
+async function putDoc(col, id, data){
+  const body = clone(data); delete body.id;
+  if(MODE==="cloud" && DB){ track(DB.collection(col).doc(id).set(body)) }
+  else { Local.load(); Local.data[col][id] = body; Local.save(); ingestLocal(col); scheduleRender() }
+}
+async function delDoc(col, id){
+  if(MODE==="cloud" && DB){ track(DB.collection(col).doc(id).delete()) }
+  else { Local.load(); delete Local.data[col][id]; Local.save(); ingestLocal(col); scheduleRender() }
+}
+async function putMany(writes){ // [{col,id,data}]
+  if(MODE==="cloud" && DB){
+    const fs = firebase.firestore();
+    for(let i=0;i<writes.length;i+=400){
+      const b = fs.batch();
+      writes.slice(i,i+400).forEach(w=>{ const body = clone(w.data); delete body.id; b.set(DB.collection(w.col).doc(w.id), body) });
+      track(b.commit());
+    }
+  } else {
+    Local.load(); writes.forEach(w=>{ const body = clone(w.data); delete body.id; Local.data[w.col][w.id] = body }); Local.save();
+    COLS.forEach(ingestLocal); scheduleRender();
+  }
+}
+
+function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement("script"); s.src=src; s.onload=res; s.onerror=()=>rej(new Error("chargement impossible : "+src)); document.head.appendChild(s) }) }
+function fbConfigured(){ const c = window.FIREBASE_CONFIG; return !!(c && c.apiKey && c.projectId && !/^COLLE/i.test(c.apiKey)) }
+
+async function boot(){
+  window.addEventListener("online", updateSync); window.addEventListener("offline", updateSync);
+  if(!fbConfigured()){ startLocal(); return }
+  MODE = "cloud-init"; render();
+  try{
+    const base = `https://www.gstatic.com/firebasejs/${FB_VERSION}/`;
+    await loadScript(base+"firebase-app-compat.js");
+    await Promise.all([loadScript(base+"firebase-auth-compat.js"), loadScript(base+"firebase-firestore-compat.js")]);
+  }catch(e){
+    // premier lancement sans réseau : impossible de charger Firebase
+    AUTH.err = "Pas de connexion internet pour le premier démarrage. Connecte-toi une fois à internet, ensuite l'application fonctionnera hors ligne.";
+    MODE = "cloud-off"; AUTH.ready = true; render(); return;
+  }
+  firebase.initializeApp(window.FIREBASE_CONFIG);
+  const fs = firebase.firestore();
+  try{ await fs.enablePersistence({synchronizeTabs:true}) }catch(e){ console.warn("Cache hors ligne indisponible :", e && e.code) }
+  firebase.auth().onAuthStateChanged(user=>{
+    AUTH.ready = true; AUTH.busy = false;
+    unsubs.forEach(u=>u()); unsubs = []; seeded = false;
+    if(!user){ AUTH.user = null; DB = null; MODE = "cloud-out"; COLS.forEach(c=>ingest(c,[])); closeModal(); render(); return }
+    AUTH.user = user; MODE = "cloud";
+    const root = fs.collection("users").doc(user.uid);
+    DB = { collection: c => root.collection(c) };
+    COLS.forEach(col=>{
+      unsubs.push(DB.collection(col).onSnapshot({includeMetadataChanges:false}, snap=>{
+        ingest(col, snap.docs.map(d=>({id:d.id, ...d.data()})));
+        if(col==="balises" && !seeded && snap.empty && !snap.metadata.fromCache){ seeded = true; seedBalises() }
+        scheduleRender();
+      }, err=>{ console.error(col, err); updateSync() }));
+    });
+    updateSync(); render();
+  });
+}
+function startLocal(){
+  MODE = "local"; Local.load();
+  if(!Object.keys(Local.data.balises).length){ DEFAULT_BALISES_ENTRIES().forEach(([id,b])=>{ Local.data.balises[id] = b }); Local.save() }
+  COLS.forEach(ingestLocal); updateSync(); render();
+}
+function seedBalises(){ putMany(DEFAULT_BALISES_ENTRIES().map(([id,b])=>({col:"balises", id, data:b}))) }
+
+function updateSync(){
+  const el = document.getElementById("sync"); if(!el) return;
+  let t, warn = false;
+  if(MODE==="local"){ t = "Sur cet appareil"; warn = true }
+  else if(MODE==="cloud"){
+    if(!navigator.onLine){ t = pending ? `Hors ligne · ${pending} en attente` : "Hors ligne · enregistré"; warn = true }
+    else t = pending ? "Synchronisation…" : "Synchronisé";
+  } else { t = "Connexion…" }
+  el.querySelector("span").textContent = t; el.querySelector("i").style.background = warn ? "var(--red)" : "var(--sun)";
+}
+function setSync(t, warn){ updateSync() }
+
+/* ---------- Connexion ---------- */
+const AUTH_ERR = {
+  "auth/invalid-credential":"E-mail ou mot de passe incorrect.", "auth/wrong-password":"E-mail ou mot de passe incorrect.", "auth/user-not-found":"Aucun compte avec cet e-mail.",
+  "auth/email-already-in-use":"Un compte existe déjà avec cet e-mail : connecte-toi.", "auth/weak-password":"Mot de passe trop court : 6 caractères minimum.",
+  "auth/invalid-email":"Adresse e-mail invalide.", "auth/network-request-failed":"Pas de connexion internet. La première connexion demande internet.",
+  "auth/too-many-requests":"Trop d'essais : patiente quelques minutes.", "auth/missing-password":"Saisis ton mot de passe.",
+  "auth/operation-not-allowed":"La connexion par e-mail n'est pas activée dans Firebase (voir le guide, étape 2).",
+  "auth/unauthorized-domain":"Ce site n'est pas autorisé dans Firebase (voir le guide, étape 5)."
+};
+function viewLogin(){
+  const v = AUTH.view;
+  if(MODE==="cloud-off") return `<div class="panel" style="max-width:460px;margin:0 auto"><div class="eyebrow">Connexion</div><h2>Hors ligne</h2><div class="note">${esc(AUTH.err)}</div><button class="btn primary" data-act="reload">Réessayer</button></div>`;
+  if(!AUTH.ready) return `<div class="empty"><b>Démarrage…</b><span>Chargement de ton espace.</span></div>`;
+  return `<div class="panel" style="max-width:460px;margin:0 auto;width:100%">
+    <div class="eyebrow">${v==="signup"?"Première utilisation":v==="reset"?"Mot de passe oublié":"Connexion"}</div>
+    <h2>${v==="signup"?"Créer ton compte":v==="reset"?"Recevoir un lien":"Retrouver tes classes"}</h2>
+    <p class="small muted" style="margin:0">${v==="reset"?"Un e-mail te permettra de choisir un nouveau mot de passe.":"Le même compte sur ton téléphone, ta tablette et ton PC : tes classes et séances s'y synchronisent."}</p>
+    <form id="login-form" class="row" style="flex-direction:column;align-items:stretch;gap:12px">
+      <label class="f">E-mail<input type="email" id="login-email" autocomplete="username" required value="${esc(AUTH.lastEmail||"")}"></label>
+      ${v!=="reset"?`<label class="f">Mot de passe<input type="password" id="login-pass" autocomplete="${v==="signup"?"new-password":"current-password"}" minlength="6" required></label>`:""}
+      ${AUTH.err?`<div class="note" role="alert" style="background:var(--red-soft)">${esc(AUTH.err)}</div>`:""}
+      ${AUTH.info?`<div class="note" role="status" style="background:var(--ok-soft)">${esc(AUTH.info)}</div>`:""}
+      <button class="btn primary block" type="submit" ${AUTH.busy?"disabled":""}>${AUTH.busy?"Patiente…":v==="signup"?"Créer mon compte":v==="reset"?"Envoyer le lien":"Se connecter"}</button>
+    </form>
+    <div class="row" style="justify-content:space-between">
+      ${v==="login"?`<button class="btn ghost sm" data-act="auth-view" data-v="signup">Créer un compte</button><button class="btn ghost sm" data-act="auth-view" data-v="reset">Mot de passe oublié</button>`
+        :`<button class="btn ghost sm" data-act="auth-view" data-v="login">J'ai déjà un compte</button>`}
+    </div></div>`;
+}
+document.addEventListener("submit", async ev=>{
+  if(ev.target.id!=="login-form") return; ev.preventDefault();
+  const email = document.getElementById("login-email").value.trim(), passEl = document.getElementById("login-pass"), pass = passEl ? passEl.value : "";
+  AUTH.lastEmail = email; AUTH.err = ""; AUTH.info = ""; AUTH.busy = true; render();
+  try{
+    const a = firebase.auth();
+    if(AUTH.view==="signup") await a.createUserWithEmailAndPassword(email, pass);
+    else if(AUTH.view==="reset"){ await a.sendPasswordResetEmail(email); AUTH.info = "E-mail envoyé. Pense à regarder dans les indésirables."; AUTH.view = "login" }
+    else await a.signInWithEmailAndPassword(email, pass);
+  }catch(e){ AUTH.err = AUTH_ERR[e.code] || ("Erreur : " + (e.message||e.code)) }
+  AUTH.busy = false; render();
+});
+
+/* ---------- Compte, installation, sauvegarde ---------- */
+window.addEventListener("beforeinstallprompt", e=>{ e.preventDefault(); deferredInstall = e; if(modalFn) renderModal() });
+window.addEventListener("appinstalled", ()=>{ deferredInstall = null; toast("Application installée") });
+function isStandalone(){ return window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true }
+function modalCompte(){
+  return ()=>{
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const n = {classes:S.classes.length, seances:S.seances.length};
+    return `${sheetHead("Compte et sauvegarde", MODE==="cloud" ? esc(AUTH.user && AUTH.user.email) : "Mode local : données sur cet appareil uniquement")}
+      <div class="panel"><div class="eyebrow">Synchronisation</div>
+        <div class="small">${MODE==="cloud" ? (navigator.onLine ? (pending ? `${pending} modification${pending>1?"s":""} en cours d'envoi.` : "Tout est synchronisé avec tes autres appareils.") : `Hors ligne. Tes modifications sont enregistrées sur l'appareil${pending?` (${pending} en attente)`:""} et partiront dès le retour d'internet.`)
+          : "Aucun compte configuré : rien n'est synchronisé. Pense à faire des sauvegardes régulières."}</div>
+        <div class="small muted">${n.classes} classe${n.classes>1?"s":""} · ${n.seances} séance${n.seances>1?"s":""}</div>
+        ${MODE==="cloud"?`<button class="btn ghost" data-act="logout">Se déconnecter</button>`:""}</div>
+      ${isStandalone() ? "" : `<div class="panel"><div class="eyebrow">Installer l'application</div>
+        ${deferredInstall ? `<button class="btn sun" data-act="install">Installer sur cet appareil</button>`
+          : ios ? `<div class="small">Sur iPhone ou iPad : ouvre ce site dans Safari, touche le bouton Partager, puis « Sur l'écran d'accueil ».</div>`
+          : `<div class="small">Dans le menu du navigateur (⋮), choisis « Installer l'application » ou « Ajouter à l'écran d'accueil ».</div>`}</div>`}
+      <div class="panel"><div class="eyebrow">Sauvegarde</div>
+        <div class="small">Un fichier qui contient tes balises, classes, séances et évaluations. Il permet aussi de transférer les données de l'ancienne version.</div>
+        <div class="row"><button class="btn primary grow" data-act="backup-export">Télécharger une sauvegarde</button>
+        <label class="btn ghost grow" for="backup-file" style="cursor:pointer">Importer une sauvegarde</label>
+        <input type="file" id="backup-file" accept="application/json,.json" hidden></div>
+        <div class="small muted">L'import ajoute ou remplace les éléments du fichier ; il ne supprime rien.</div></div>`;
+  };
+}
+function backupObject(){
+  const data = {balises:{}, classes:{}, seances:{}, config:{}, evals:{}};
+  Object.values(S.balises).forEach(b=>{ const c = clone(b); delete c.id; data.balises["b"+b.num] = c });
+  S.classes.forEach(c=>{ const x = clone(c); delete x.id; data.classes[c.id] = x });
+  S.seances.forEach(s=>{ const x = clone(s); delete x.id; data.seances[s.id] = x });
+  if(S.config && Object.keys(S.config).length){ const x = clone(S.config); delete x.id; data.config.app = x }
+  Object.entries(S.evals).forEach(([k,v])=>{ const x = clone(v); delete x.id; data.evals[k] = x });
+  return {app:"co-vidal", version:1, exported:new Date().toISOString(), data};
+}
+document.addEventListener("change", ev=>{
+  if(ev.target.id!=="backup-file") return;
+  const f = ev.target.files && ev.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = ()=>{
+    let o; try{ o = JSON.parse(rd.result) }catch(e){ toast("Ce fichier n'est pas une sauvegarde valide."); return }
+    if(!o || o.app!=="co-vidal" || !o.data){ toast("Ce fichier n'est pas une sauvegarde de l'application."); return }
+    const writes = []; COLS.forEach(col=>{ Object.entries(o.data[col]||{}).forEach(([id,d])=>{ if(d && typeof d==="object") writes.push({col, id, data:d}) }) });
+    putMany(writes); toast(`${writes.length} éléments importés`); closeModal();
+  };
+  rd.readAsText(f);
+});
+
+const DEFAULT_BALISES = {"b1": {"actif": false, "animal": "", "iso": 3, "num": 1, "pince": "A1", "poteau": "A1", "remarque": "Vérifiée le 27/04/25 ; pince changée. Pas de cercle sur la carte Zone Nord", "schema": "0,1 0,2.75 1,0 1,3.75 2,1 2,2.75", "sigle": "losange"}, "b10": {"actif": true, "animal": "", "iso": 1, "num": 10, "pince": "B3", "poteau": "A11", "remarque": "Vérifiée le 06/09/26 ; pince changée ; poteau redressé contre l'arbre remarquable", "schema": "0,0.75 1,0 2,0.75", "sigle": "fleur"}, "b11": {"actif": true, "animal": "papillon", "iso": 1, "num": 11, "pince": "Décat 7", "poteau": "A12", "remarque": "Vérifiée le 06/09/26", "schema": "0,0 0,1 0,2 0,3 1.25,3 2.5,3", "sigle": "guitare"}, "b12": {"actif": true, "animal": "singe", "iso": 1, "num": 12, "pince": "Décat 3", "poteau": "A13", "remarque": "Vérifiée le 06/09/26 ; pince changée", "schema": "0,1 0.5,0 1.25,1", "sigle": "fauteuil roulant"}, "b13": {"actif": true, "animal": "", "iso": 3, "num": 13, "pince": "", "poteau": "A14", "remarque": "Vérifiée le 06/09/26 ; plus de chapeau", "schema": "0,1 0,2.75 1,0 1,3.75 2,1 2,2.75", "sigle": "symbole ♂"}, "b14": {"actif": true, "animal": "tortue", "iso": 1, "num": 14, "pince": "B3", "poteau": "A15", "remarque": "Vérifiée le 06/09/26 ; pince attachée à une liane, fanion orange et blanc", "schema": "0,2 1.25,3 2.5,0 2.5,1 2.5,2", "sigle": "cible"}, "b15": {"actif": true, "animal": "toucan", "iso": 3, "num": 15, "pince": "", "poteau": "A16", "remarque": "Vérifiée le 06/09/26 ; poteau et chapeau attaqués", "schema": "0,0.75 1,0 2,0.75", "sigle": "triskel"}, "b2": {"actif": true, "animal": "caïman", "iso": 1, "num": 2, "pince": "A2", "poteau": "A2", "remarque": "Vérifiée le 06/09/26", "schema": "0,0 0,1.5 1,0.75 2,0 2,1.5", "sigle": "@"}, "b20": {"actif": true, "animal": "", "iso": 2, "num": 20, "pince": "B9", "poteau": "B22", "remarque": "Vérifiée le 06/09/26", "schema": "0,1.75 1,0 1,1 2,0", "sigle": "chauve-souris"}, "b23": {"actif": true, "animal": "grenouille", "iso": 1, "num": 23, "pince": "", "poteau": "B25", "remarque": "Vérifiée le 06/09/26", "schema": "0,0 1.25,0 1.25,1 1.25,2 2.5,0", "sigle": "étoile"}, "b25": {"actif": true, "animal": "lézard", "iso": 2, "num": 25, "pince": "", "poteau": "B27", "remarque": "Vérifiée le 06/09/26 ; poteau bouge", "schema": "0,0 1,0 2,0 2,1 2,2", "sigle": "fleur"}, "b27": {"actif": true, "animal": "", "iso": 1, "num": 27, "pince": "Décat 6", "poteau": "B29", "remarque": "Vérifiée le 06/09/26 ; chapeau bouge", "schema": "0,0 0,1 0,2 0,3 0,4 1,0 1,2 1,4 2.25,0 2.25,2 2.25,3 2.25,4", "sigle": "fauteuil roulant"}, "b28": {"actif": true, "animal": "papillon", "iso": 1, "num": 28, "pince": "A3", "poteau": "B31", "remarque": "Vérifiée le 06/09/26", "schema": "0,1 1,0 1,1 2,1", "sigle": "symbole ♂"}, "b3": {"actif": true, "animal": "serpent", "iso": 2, "num": 3, "pince": "A7", "poteau": "A3", "remarque": "Vérifiée le 06/09/26", "schema": "0,1.75 1,0 1,1.75 2,0", "sigle": "ballon de basket"}, "b30": {"actif": true, "animal": "paresseux", "iso": 2, "num": 30, "pince": "B5", "poteau": "B33", "remarque": "Vérifiée le 06/09/26 ; tête du poteau cassée", "schema": "0,0 0,1 1,2 1.75,0 1.75,1", "sigle": "infini"}, "b36": {"actif": true, "animal": "", "iso": 2, "num": 36, "pince": "", "poteau": "C39", "remarque": "Vérifiée le 06/09/26", "schema": "0,1 0.75,0 0.75,2 1.25,1", "sigle": "@"}, "b39": {"actif": true, "animal": "singe", "iso": 1, "num": 39, "pince": "", "poteau": "C43", "remarque": "Vérifiée le 06/09/26", "schema": "0,0 0,1 0,2 1.25,0 1.25,1 1.25,2 2.5,0 2.5,1 2.5,2", "sigle": "disque"}, "b4": {"actif": true, "animal": "", "iso": 1, "num": 4, "pince": "Décat 9", "poteau": "A4", "remarque": "Vérifiée le 06/09/26 ; tête du poteau cassée", "schema": "0,0 0,1 0,2 0,4 1,0 1,2 1,4 2.25,0 2.25,1 2.25,2 2.25,3 2.25,4", "sigle": "ballon de foot"}, "b45": {"actif": true, "animal": "oiseau", "iso": 1, "num": 45, "pince": "B1", "poteau": "C49", "remarque": "Vérifiée le 06/09/26 ; poteau redressé contre l'arbre remarquable", "schema": "0,0.75 1,0 1,1.5 2,0.75", "sigle": "étoile"}, "b46": {"actif": true, "animal": "", "iso": 2, "num": 46, "pince": "", "poteau": "C51", "remarque": "Vérifiée le 06/09/26 ; poteau bouge", "schema": "0,1 0,2 1,0 1,3 2,1 2,2", "sigle": "symbole ♀"}, "b47": {"actif": true, "animal": "dauphin", "iso": 1, "num": 47, "pince": "C52", "poteau": "C52", "remarque": "Vérifiée le 06/09/26 ; pince abîmée", "schema": "0,0 0,1 0,2 1,0.5 1,1.5 2,1", "sigle": "fleur"}, "b5": {"actif": true, "animal": "colibri", "iso": 1, "num": 5, "pince": "Orientsport", "poteau": "B33", "remarque": "Vérifiée le 06/09/26 ; pince changée, placée sur un arbre remarquable (plus de poteau)", "schema": "0,0 1,0 2,0 3,0", "sigle": "ballon de rugby"}, "b54": {"actif": true, "animal": "", "iso": 2, "num": 54, "pince": "", "poteau": "C59", "remarque": "Vérifiée le 06/09/26 ; chapeau abîmé, à changer", "schema": "0,0 0,1 1,0 1,1", "sigle": "anneaux olympiques"}, "b6": {"actif": true, "animal": "oiseau", "iso": 1, "num": 6, "pince": "B6", "poteau": "A6", "remarque": "Vérifiée le 06/09/26", "schema": "0,1.5 1,0 1,1 1,2 1,3 2,1.5", "sigle": "chauve-souris"}, "b67": {"actif": true, "animal": "", "iso": 1, "num": 67, "pince": "B3", "poteau": "C74", "remarque": "Vérifiée le 06/09/26", "schema": "0,2 0,3 1.25,3 2.5,0 2.5,2 2.5,3", "sigle": "trèfle"}, "b7": {"actif": true, "animal": "oiseau", "iso": 1, "num": 7, "pince": "A3", "poteau": "A7", "remarque": "Vérifiée le 06/09/26", "schema": "0,1.75 1,0 1,1.75 2,0", "sigle": "cœurs"}, "b8": {"actif": true, "animal": "lézard", "iso": 1, "num": 8, "pince": "Décat 2", "poteau": "A8", "remarque": "Vérifiée le 06/09/26", "schema": "0,0 0,2 0,3 0,4 1,0 1,2 1,4 2,0 2,1 2,2 2,4", "sigle": "étoile"}, "b9": {"actif": true, "animal": "", "iso": 1, "num": 9, "pince": "A9", "poteau": "A9", "remarque": "Vérifiée le 06/09/26", "schema": "0,0 0,1.5 1,0 1,1.5", "sigle": "symbole ♀"}};
+function DEFAULT_BALISES_ENTRIES(){ return Object.entries(clone(DEFAULT_BALISES)) }
+
+/* ================= Outils ================= */
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function fmtTime(ms){ if(ms==null||ms<0) ms=0; const s=Math.floor(ms/1000); const h=Math.floor(s/3600), m=Math.floor(s%3600/60), x=s%60; return (h? h+":"+String(m).padStart(2,"0") : String(m).padStart(2,"0"))+":"+String(x).padStart(2,"0") }
+function fmtDate(t){ return new Date(t).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"}) }
+function depart(){ return S.config.depart || DEFAULT_DEPART }
+function bal(n){ return S.balises[n] || {num:+n} }
+/* schéma de poinçon : "x,y x,y …" en unités d'écart entre picots (pas de 0,25) */
+function parseSchema(str){ if(!str) return []; return String(str).trim().split(/\s+/).map(t=>t.split(",").map(Number)).filter(p=>p.length===2&&p.every(v=>isFinite(v))) }
+function fmtSchema(pts){ return pts.map(p=>p.map(v=>+v.toFixed(2)).join(",")).join(" ") }
+function schemaSVG(str){
+  const P = parseSchema(str); if(!P.length) return "";
+  const xs=P.map(p=>p[0]), ys=P.map(p=>p[1]); const x0=Math.min(...xs), y0=Math.min(...ys), w=Math.max(...xs)-x0, h=Math.max(...ys)-y0;
+  let md = 1; for(let i=0;i<P.length;i++) for(let j=i+1;j<P.length;j++){ const d=Math.hypot(P[i][0]-P[j][0],P[i][1]-P[j][1]); if(d>0) md=Math.min(md,d) }
+  const r = Math.min(.34, md*.42), side = Math.max(w,h,1)+2*r+.3, ox=(side-w)/2-x0, oy=(side-h)/2-y0;
+  return `<svg viewBox="0 0 ${side} ${side}" aria-hidden="true">${P.map(p=>`<circle cx="${(p[0]+ox).toFixed(3)}" cy="${(p[1]+oy).toFixed(3)}" r="${r.toFixed(3)}" fill="#16241A"/>`).join("")}</svg>`;
+}
+function schemaBox(n, cls){ const sv = schemaSVG(bal(n).schema); return sv ? `<span class="schema ${cls||''}" role="img" aria-label="Schéma de poinçon de la balise ${n}">${sv}</span>` : `<span class="schema none ${cls||''}">schéma à saisir</span>` }
+function isActive(n){ const b = S.balises[n]; return GEO[n] && (!b || b.actif !== false) }
+function iso(n){ const v = +(bal(n).iso); return v>=1&&v<=3 ? v : 2 }
+function dist(a,b){ return Math.hypot(a[0]-b[0], a[1]-b[1]) * M_PER_PX }
+function pt(n){ if(n==="D"){ const d = depart(); return [d.x,d.y] } return GEO[n] }
+function routeLen(seq){ let L=0, prev=pt("D"); for(const n of seq){ L+=dist(prev,pt(n)); prev=pt(n) } return L + dist(prev,pt("D")) }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a }
+
+/* ================= Temps cible ================= */
+const SEUIL_MIN = {1:3, 2:3.5, 3:4};             // minutes par balise selon la difficulté
+function cibleMs(r){ return r.n * SEUIL_MIN[r.diff] * 60000 }
+function runTime(r){ return r.end!=null && r.start!=null ? r.end - r.start : null }
+function coefTemps(r){ const t = runTime(r); if(!t) return 1; return Math.min(1, cibleMs(r)/t) }
+function counted(r){ return okCount(r) * coefTemps(r) }
+function inTime(r){ const t = runTime(r); return t!=null && t <= cibleMs(r) }
+
+/* ================= Barèmes d'évaluation ================= */
+const LEVELS = ["Non évalué","Maîtrise insuffisante","Maîtrise fragile","Maîtrise satisfaisante","Très bonne maîtrise"];
+const LV_SHORT = ["–","MI","MF","MS","TBM"];
+const CYCLES = {
+  3:{ nom:"Cycle 3 · 6ᵉ",
+      kB:[0,6,10,15,20], kP:[0,50,75,90,100],
+      cond:["", "un parcours terminé", "un parcours Moyen tenté", "un parcours Moyen réussi à 100 % dans le temps"],
+      rubs:[
+        {id:"carte", nom:"Lire la carte", pts:4, d:["Ne relie pas la carte au terrain, suit les autres","Oriente la carte avec aide, se repère sur les chemins","Oriente seul sa carte, se situe sur les grands repères","Garde la carte orientée en continu, anticipe le poste suivant"]},
+        {id:"secu", nom:"Sécurité et règles", pts:3, d:["Sort des limites, ne respecte pas l'heure de retour","Respecte les limites mais oublie les consignes de retour","Respecte limites, horaires et règles du binôme","Sait quoi faire s'il est perdu et le rappelle à son binôme"]},
+        {id:"coop", nom:"Coopérer en binôme", pts:3, d:["Se sépare de son partenaire","Reste ensemble, mais un seul décide","Partage la lecture de carte et le poinçonnage","Alterne les rôles, explique ses choix à son partenaire"]}
+      ]},
+  4:{ nom:"Cycle 4 · 5ᵉ, 4ᵉ, 3ᵉ",
+      kB:[0,8,14,20,26], kP:[0,60,80,90,100],
+      cond:["", "un parcours Moyen tenté", "un parcours Moyen réussi à 100 % dans le temps", "un parcours Difficile réussi à 100 % dans le temps"],
+      rubs:[
+        {id:"secu", nom:"Sécurité et responsabilité", pts:4, d:["Ne respecte pas les règles","Respecte les règles quand on les lui rappelle","Respecte les règles et veille sur son binôme","Fait respecter les règles et sait conduire la procédure si quelqu'un est perdu"]},
+        {id:"itin", nom:"Planifier son itinéraire", pts:3, d:["Part sans regarder la carte","Choisit le trajet le plus visible, même s'il est long","Planifie avant de partir et utilise les lignes directrices","Choisit entre l'itinéraire sûr et le direct, et adapte son choix en route"]},
+        {id:"ress", nom:"Gérer ses ressources", pts:3, d:["Part trop vite puis s'arrête, dépasse le temps","Allure irrégulière, finit juste dans le temps","Allure régulière, finit dans le temps","Ajuste son allure à la difficulté du poste, temps maîtrisé"]}
+      ]}
+};
+function classCycle(c){ if(!c) return 4; if(c.cycle==3||c.cycle==4) return +c.cycle; return /^\s*6/.test(c.nom||"") ? 3 : 4 }
+function interp(v, k){ if(v>=k[4]) return 4; for(let i=1;i<5;i++){ if(v<k[i]) return (i-1) + (v-k[i-1])/(k[i]-k[i-1]) } return 4 }
+function lvOf(s){ return s>=3?4 : s>=2?3 : s>=1?2 : 1 }
+/* score d'une séance pour un élève (0 à 4) : le plus bas de quantité, précision et condition */
+function seanceScore(runs, cyc){
+  const R = runs.filter(r=>r.end); if(!R.length) return null;
+  const C = CYCLES[cyc];
+  const B = R.reduce((t,r)=>t+counted(r),0), V = R.reduce((t,r)=>t+okCount(r),0), N = R.reduce((t,r)=>t+r.n,0);
+  const P = N ? 100*V/N : 0;
+  const ok = r => okCount(r)===r.n && inTime(r);
+  let cond;
+  if(cyc==3) cond = R.some(r=>r.diff>=2 && ok(r)) ? 4 : R.some(r=>r.diff>=2) ? 3 : 2;
+  else cond = R.some(r=>r.diff>=3 && ok(r)) ? 4 : R.some(r=>r.diff>=2 && ok(r)) ? 3 : R.some(r=>r.diff>=2) ? 2 : 1;
+  const sB = interp(B, C.kB), sP = interp(P, C.kP), cap = cond<4 ? cond - .001 : 4;
+  const sc = Math.max(0, Math.min(sB, sP, cap));
+  const lim = sc===cap ? "condition" : sc===sB ? "quantité" : "précision";
+  return {sc, B, V, N, P, cond, lim, runs:R.length};
+}
+/* efficacité d'un élève : moyenne des 2 meilleures séances parmi ses 3 dernières */
+function efficacite(cl, eleve){
+  const cyc = classCycle(cl);
+  const ses = S.seances.filter(s=>s.classeId===cl.id).sort((a,b)=>a.date-b.date)
+    .map(s=>{ const g = s.groupes.find(g=>g.eleves.includes(eleve)); return g ? {s, r:seanceScore(g.runs||[], cyc)} : null })
+    .filter(x=>x && x.r);
+  const last3 = ses.slice(-3); if(!last3.length) return null;
+  const kept = last3.slice().sort((a,b)=>b.r.sc-a.r.sc).slice(0,2);
+  const sc = kept.reduce((t,x)=>t+x.r.sc,0)/kept.length;
+  return {sc, pts: sc/4*10, lv: lvOf(sc), last3, kept};
+}
+function evalOf(clId){ return (S.evals[clId] && S.evals[clId].obs) || {} }
+function noteEleve(cl, eleve){
+  const C = CYCLES[classCycle(cl)], ef = efficacite(cl, eleve), obs = evalOf(cl.id)[eleve] || {};
+  let total = ef ? ef.pts : 0, complete = !!ef;
+  const rubs = C.rubs.map(r=>{ const l = +obs[r.id] || 0; if(!l) complete = false; const pts = l ? r.pts*l/4 : 0; total += pts; return {...r, max:r.pts, l, pts} });
+  const t = Math.round(total*2)/2;
+  return {ef, rubs, total:t, complete, lv: t>=15?4 : t>=10?3 : t>=5?2 : 1};
+}
+const fmtPts = v => (Math.round(v*100)/100).toLocaleString("fr-FR",{maximumFractionDigits:2});
+
+/* ordre de passage : plus proche voisin depuis le départ, puis amélioration 2-opt */
+function orderRoute(set){
+  const left = set.slice(), seq = []; let cur = pt("D");
+  while(left.length){ let bi=0, bd=1e9; left.forEach((n,i)=>{ const d=dist(cur,pt(n)); if(d<bd){bd=d;bi=i} }); const n = left.splice(bi,1)[0]; seq.push(n); cur = pt(n) }
+  let improved = true, guard = 0;
+  while(improved && guard++ < 40){
+    improved = false;
+    for(let i=0;i<seq.length-1;i++) for(let k=i+1;k<seq.length;k++){
+      const cand = seq.slice(0,i).concat(seq.slice(i,k+1).reverse(), seq.slice(k+1));
+      if(routeLen(cand) + 0.01 < routeLen(seq)){ seq.splice(0, seq.length, ...cand); improved = true }
+    }
+  }
+  return seq;
+}
+
+/* génération : on tire beaucoup de jeux de balises, on les classe par difficulté
+   (70 % distance moyenne entre postes, 30 % isolement), puis on pioche dans la tranche voulue */
+function generate(n, diff, exclude){
+  const all = Object.keys(GEO).map(Number).filter(isActive);
+  let pool = all.filter(b=>!exclude.has(b));
+  let reused = [];
+  if(pool.length < n){ reused = shuffle(all.filter(b=>exclude.has(b))).slice(0, n-pool.length); pool = pool.concat(reused) }
+  n = Math.min(n, pool.length);
+  if(n < 1) return null;
+  const cands = [], seen = new Set(), tries = 700;
+  for(let t=0;t<tries;t++){
+    let set;
+    if(diff===1 && Math.random()<.6){ // jeux compacts : départ d'une balise puis voisins proches
+      const seed = pool[Math.floor(Math.random()*pool.length)];
+      set = pool.slice().sort((a,b)=>dist(pt(seed),pt(a))-dist(pt(seed),pt(b))).slice(0, n+2);
+      set = shuffle(set).slice(0,n);
+    } else set = shuffle(pool).slice(0,n);
+    const key = set.slice().sort((a,b)=>a-b).join(",");
+    if(seen.has(key)) continue; seen.add(key);
+    const L = routeLen(orderRoute(set));
+    cands.push({set, leg:L/(n+1), iso:set.reduce((s,b)=>s+iso(b),0)/n});
+  }
+  const mm = k => { const v = cands.map(c=>c[k]); return [Math.min(...v), Math.max(...v)] };
+  const [l0,l1] = mm("leg"), [i0,i1] = mm("iso");
+  cands.forEach(c=>{ c.score = .7*((c.leg-l0)/((l1-l0)||1)) + .3*((c.iso-i0)/((i1-i0)||1)) });
+  cands.sort((a,b)=>a.score-b.score);
+  const N = cands.length, band = {1:[0,.25],2:[.375,.625],3:[.75,1]}[diff];
+  const lo = Math.floor(band[0]*N), hi = Math.max(lo+1, Math.floor(band[1]*N));
+  const pick = cands[lo + Math.floor(Math.random()*(hi-lo))];
+  const seq = orderRoute(pick.set);
+  return {seq, n:seq.length, diff, dist:Math.round(routeLen(seq)), isoMoy:+pick.iso.toFixed(1), reused:reused.filter(b=>seq.includes(b))};
+}
+
+/* ================= Carte ================= */
+function mapHTML(seq, opts={}){
+  const d = depart(); const s = seq || [];
+  let lines = "", circles = "", labels = "";
+  const pts = [[d.x,d.y], ...s.map(n=>GEO[n])];
+  for(let i=0;i<pts.length-1;i++){ lines += segment(pts[i], pts[i+1], 26, i===0?30:26) }
+  if(s.length) lines += segment(pts[pts.length-1], [d.x,d.y], 26, 30, true);
+  s.forEach((n,i)=>{
+    const [x,y] = GEO[n]; const v = opts.valid ? opts.valid[n] : undefined;
+    const col = v===true ? "var(--ok)" : v===false ? "var(--ko)" : "var(--route)";
+    circles += `<circle cx="${x}" cy="${y}" r="24" fill="none" stroke="${col}" stroke-width="6"/>`;
+    labels += `<g><rect x="${x+20}" y="${y-48}" rx="8" width="${i+1>9?40:30}" height="28" fill="${col}"/><text x="${x+20+(i+1>9?20:15)}" y="${y-28}" text-anchor="middle" font-family="Bricolage Grotesque, sans-serif" font-weight="800" font-size="20" fill="#fff">${i+1}</text></g>`;
+  });
+  if(opts.all){
+    Object.keys(GEO).forEach(n=>{ const [x,y]=GEO[n]; circles += `<circle cx="${x}" cy="${y}" r="9" fill="${isActive(n)?'var(--route)':'#888'}" opacity=".85"/>` });
+  }
+  const tri = `<polygon points="${d.x},${d.y-30} ${d.x-27},${d.y+17} ${d.x+27},${d.y+17}" fill="none" stroke="var(--route)" stroke-width="6" stroke-linejoin="round"/>`;
+  return `<div class="map${opts.pick?' pick':''}" ${opts.pick?'data-act="pick-depart"':''}>
+    <img src="map.jpg" alt="Carte de la Zone Nord, parcours d'orientation Vidal-Mondélice" width="${MAP_W}" height="${MAP_H}">
+    <svg viewBox="0 0 ${MAP_W} ${MAP_H}" preserveAspectRatio="none" aria-hidden="true">${lines}${circles}${tri}${labels}</svg></div>`;
+}
+function segment(a,b,ra,rb,dashed){
+  const dx=b[0]-a[0], dy=b[1]-a[1], L=Math.hypot(dx,dy); if(L<ra+rb+4) return "";
+  const ux=dx/L, uy=dy/L;
+  return `<line x1="${a[0]+ux*ra}" y1="${a[1]+uy*ra}" x2="${b[0]-ux*rb}" y2="${b[1]-uy*rb}" stroke="var(--route)" stroke-width="5" stroke-linecap="round" ${dashed?'stroke-dasharray="4 12" opacity=".7"':''}/>`;
+}
+
+/* ================= État de l'interface ================= */
+const UI = {tab:"seance", draft:null, wiz:null, suiviClasse:null, editClasse:null};
+const TABS = [
+  ["seance","Séance",'<path d="M3 12h4l3-8 4 16 3-8h4"/>'],
+  ["parcours","Parcours",'<path d="M12 3 4 20h16z"/><circle cx="12" cy="14" r="2.5"/>'],
+  ["classes","Classes",'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c3 .2 5.5 2.6 5.5 5.8"/>'],
+  ["suivi","Suivi",'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'],
+  ["eval","Évaluation",'<path d="M5 3h10l4 4v14H5z"/><path d="M9 12l2 2 4-4"/>'],
+  ["balises","Balises",'<circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/>']
+];
+function renderTabs(){
+  document.getElementById("tabs").innerHTML = TABS.map(([k,l,ic])=>
+    `<button class="tab${UI.tab===k?' on':''}" data-act="tab" data-k="${k}" aria-current="${UI.tab===k?'page':'false'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ic}</svg>${l}</button>`).join("");
+}
+
+let renderQueued = false;
+function scheduleRender(){ if(renderQueued) return; renderQueued = true; requestAnimationFrame(()=>{ renderQueued=false; const a=document.activeElement; if(a && /INPUT|TEXTAREA|SELECT/.test(a.tagName) && document.getElementById("main").contains(a)){ pendingRender = true; return } render(); if(modalFn) renderModal() }) }
+let pendingRender = false;
+document.addEventListener("focusout", ()=>{ if(pendingRender){ setTimeout(()=>{ const a=document.activeElement; if(!(a && /INPUT|TEXTAREA|SELECT/.test(a.tagName))){ pendingRender=false; render() } }, 50) } });
+
+function render(){
+  const m = document.getElementById("main");
+  const needLogin = MODE==="cloud-init" || MODE==="cloud-out" || MODE==="cloud-off";
+  document.querySelector(".tabs").hidden = needLogin; updateSync();
+  if(needLogin){ m.innerHTML = viewLogin(); return }
+  if(MODE==="init"){ m.innerHTML = `<div class="empty"><b>Démarrage…</b></div>`; return }
+  renderTabs();
+  m.innerHTML = ({seance:viewSeance, parcours:viewParcours, classes:viewClasses, suivi:viewSuivi, eval:viewEval, balises:viewBalises}[UI.tab])();
+  tick();
+}
+
+/* ================= Séance / vue globale ================= */
+function activeSeance(){ return S.seances.find(s=>!s.cloturee) }
+function curRun(g){ const r = g.runs && g.runs[g.runs.length-1]; return r && !r.end ? r : null }
+function gStatus(g){ if(g.fini) return "fini"; const r = g.runs && g.runs[g.runs.length-1]; if(!r || !r.start) return "attente"; return r.end ? "arrive" : "course" }
+const ST_LABEL = {attente:["wait","Au départ"], course:["run","En course"], arrive:["arr","Arrivé · à corriger"], fini:["done","Séance terminée · présent"]};
+function usedBy(g){ const s = new Set(); (g.runs||[]).forEach(r=>r.seq.forEach(b=>s.add(b))); return s }
+function okCount(r){ return r.seq.filter(b=>r.valid && r.valid[b]===true).length }
+
+function viewSeance(){
+  const s = activeSeance();
+  if(!s) return viewNewSeance();
+  const cl = S.classes.find(c=>c.id===s.classeId);
+  const counts = {attente:0,course:0,arrive:0,fini:0};
+  s.groupes.forEach(g=>counts[gStatus(g)]++);
+  return `
+  <div class="sec-h"><div><div class="eyebrow">Séance en cours · ${fmtDate(s.date)}</div><h2>${esc(cl?cl.nom:"Classe supprimée")}</h2></div>
+    <button class="btn ghost sm" data-act="close-seance">Clôturer la séance</button></div>
+  <div class="kpis">
+    <div class="kpi"><b>${counts.attente}</b><span>Au départ</span></div>
+    <div class="kpi"><b>${counts.course}</b><span>En course</span></div>
+    <div class="kpi"><b>${counts.arrive}</b><span>À corriger</span></div>
+    <div class="kpi"><b>${counts.fini}</b><span>Présents</span></div>
+  </div>
+  <div class="groups">${s.groupes.map(g=>groupCard(s,g)).join("")}</div>`;
+}
+
+function groupCard(s,g){
+  const st = gStatus(g), [pc,pl] = ST_LABEL[st];
+  const r = g.runs && g.runs[g.runs.length-1];
+  const done = (g.runs||[]).filter(x=>x.end);
+  let mid = "", act = "";
+  if(st==="fini"){
+    mid = `<div class="chrono">${fmtTime(done.reduce((t,x)=>t+(x.end-x.start),0))}</div><div class="small muted">${done.length} parcours · ${done.reduce((t,x)=>t+okCount(x),0)} balises validées</div>`;
+    act = `<button class="btn ghost sm" data-act="reopen" data-g="${g.id}">Reprendre</button>`;
+  } else if(!r){
+    mid = `<div class="chrono idle">--:--</div><div class="small muted">Aucun parcours attribué</div>`;
+    act = `<button class="btn primary" data-act="wiz-group" data-g="${g.id}">Donner un parcours</button>`;
+  } else if(r && !r.start){
+    mid = `<div class="row" style="align-items:baseline;gap:12px"><div class="chrono idle">00:00</div><span class="cible">cible ${fmtTime(cibleMs(r))}</span></div><div class="runline"><b>Parcours ${g.runs.length}</b> · ${r.n} balises · ${DIFF[r.diff].nom} · ${r.dist} m</div>`;
+    act = `<button class="btn go" data-act="start" data-g="${g.id}">Départ</button><button class="btn ghost" data-act="show-run" data-g="${g.id}" data-r="${r.id}">Carte</button>`;
+  } else if(r && r.start && !r.end){
+    mid = `<div class="row" style="align-items:baseline;gap:12px"><div class="chrono" data-start="${r.start}" data-cible="${cibleMs(r)}">00:00</div><span class="cible">cible ${fmtTime(cibleMs(r))}</span></div><div class="runline"><b>Parcours ${g.runs.length}</b> · ${r.n} balises · ${DIFF[r.diff].nom} · ${r.dist} m</div>`;
+    act = `<button class="btn stop" data-act="arrive" data-g="${g.id}">Arrivée</button><button class="btn ghost" data-act="show-run" data-g="${g.id}" data-r="${r.id}">Carte</button>`;
+  } else {
+    mid = `<div class="row" style="align-items:baseline;gap:12px"><div class="chrono${inTime(r)?'':' over'}">${fmtTime(r.end-r.start)}</div><span class="cible${inTime(r)?'':' over'}">cible ${fmtTime(cibleMs(r))}</span></div><div class="runline"><b>Parcours ${g.runs.length}</b> terminé · ${okCount(r)}/${r.n} validées</div>`;
+    act = `<button class="btn sun" data-act="correct" data-g="${g.id}" data-r="${r.id}">Corriger et décider</button>`;
+  }
+  const postes = (r && st!=="fini") ? `<div class="postes" aria-label="Postes du parcours, dans l'ordre">${r.seq.map((b,i)=>{ const v = r.end && r.valid ? r.valid[b] : undefined; return `<span class="poste${v===true?' ok':v===false?' ko':''}"><small>${i+1}.</small>${b}</span>` }).join("")}</div>` : "";
+  const hist = done.length ? `<div class="hist">${done.map((x,i)=>`<button class="h btn sm ghost" style="min-height:28px;padding:2px 8px" data-act="correct" data-g="${g.id}" data-r="${x.id}" title="Voir la correction">P${i+1} · ${okCount(x)}/${x.n} · ${fmtTime(x.end-x.start)}</button>`).join("")}</div>` : "";
+  return `<article class="gcard" data-st="${st}">
+    <div class="row" style="justify-content:space-between;align-items:flex-start"><div class="grow"><div class="gname">${esc(g.nom)}</div><div class="gstud">${g.eleves.map(esc).join(" · ")}</div></div><span class="pill ${pc}"><i></i>${pl}</span></div>
+    ${mid}${postes}${hist}<div class="gact">${act}</div></article>`;
+}
+
+function viewNewSeance(){
+  if(!S.classes.length) return `
+    <div class="sec-h"><div><div class="eyebrow">Séance</div><h2>Préparer une séance</h2></div></div>
+    <div class="empty"><b>Aucune classe pour l'instant</b><span>Ajoute une classe et sa liste d'élèves pour pouvoir former les groupes.</span><button class="btn primary" data-act="tab" data-k="classes">Ajouter une classe</button></div>
+    ${lastSeancesHTML()}`;
+  const d = UI.draft || (UI.draft = {classeId:S.classes[0].id, taille:2, groupes:null, pool:[], sel:null, mode:null});
+  if(!S.classes.find(c=>c.id===d.classeId)){ d.classeId = S.classes[0].id; d.groupes = null; d.pool = []; d.sel = null }
+  const cl = S.classes.find(c=>c.id===d.classeId);
+  const full = d.groupes ? d.groupes.filter(g=>g.length) : [];
+  const editor = d.groupes ? `
+    <div class="small muted">${d.sel ? `<b style="color:var(--fg)">${esc(d.sel)}</b> sélectionné : touche le groupe où le placer, ou touche à nouveau l'élève pour annuler.` : `Pour déplacer un élève, touche son nom puis le groupe voulu. Les élèves laissés dans « Absents » ne participent pas à la séance.`}</div>
+    <div class="geditor">
+      ${d.groupes.map((g,i)=>gboxHTML(String(i), `Groupe ${i+1}`, g, d)).join("")}
+      <button class="addg" data-act="add-grp">+ Ajouter un groupe</button>
+      ${gboxHTML("pool", "Absents · non placés", d.pool, d)}
+    </div>
+    ${d.pool.length && d.groupes.length ? `<button class="btn ghost" data-act="fill-rand">Placer les ${d.pool.length} élèves restants au hasard</button>` : ""}
+    <button class="btn primary block" data-act="start-seance" ${full.length?'':'disabled'}>Démarrer la séance (${full.length} groupe${full.length>1?'s':''}${d.pool.length?` · ${d.pool.length} absent${d.pool.length>1?'s':''}`:''})</button>` : `<div class="small muted">${cl.eleves.length} élèves dans cette classe.</div>`;
+  return `
+  <div class="sec-h"><div><div class="eyebrow">Séance</div><h2>Préparer une séance</h2><p>Choisis la classe, forme les groupes au hasard ou toi-même, puis lance la séance.</p></div></div>
+  <div class="panel">
+    <div class="row">
+      <label class="f grow">Classe<select id="d-classe" data-act="draft-classe">${S.classes.map(c=>`<option value="${c.id}" ${c.id===d.classeId?'selected':''}>${esc(c.nom)} (${c.eleves.length})</option>`).join("")}</select></label>
+      <label class="f" style="width:150px">Taille des groupes<select id="d-taille" data-act="draft-taille"><option value="2" ${d.taille==2?'selected':''}>Binômes</option><option value="3" ${d.taille==3?'selected':''}>Trinômes</option></select></label>
+    </div>
+    <div class="row">
+      <button class="btn sun grow" data-act="draw">${d.mode==="hasard"?'Nouveau tirage au sort':'Tirer au sort'}</button>
+      <button class="btn ghost grow" data-act="manual">${d.mode==="manuel"?'Recommencer à la main':'Composer moi-même'}</button>
+    </div>
+    ${editor}
+  </div>
+  ${lastSeancesHTML()}`;
+}
+function gboxHTML(key, title, list, d){
+  const target = d.sel && !list.includes(d.sel);
+  return `<div class="gbox${key==="pool"?' pool':''}${target?' target':''}" ${target?`data-act="drop" data-i="${key}" role="button" tabindex="0" aria-label="Placer ${esc(d.sel)} dans ${esc(title)}"`:''}>
+    <div class="gbox-h">${esc(title)}<span>${list.length ? list.length+" élève"+(list.length>1?"s":"") : (key==="pool"?"aucun":"vide")}</span></div>
+    <div class="stus">${list.map(n=>`<button class="stu${d.sel===n?' sel':''}" data-act="pick-stu" data-n="${esc(n)}" aria-pressed="${d.sel===n}">${esc(n)}</button>`).join("")}</div>
+  </div>`;
+}
+function draftWhere(d, n){ if(d.pool.includes(n)) return "pool"; const i = d.groupes.findIndex(g=>g.includes(n)); return String(i) }
+function draftMove(d, n, key){
+  const from = draftWhere(d, n);
+  if(from==="pool") d.pool = d.pool.filter(x=>x!==n); else d.groupes[+from] = d.groupes[+from].filter(x=>x!==n);
+  if(key==="pool") d.pool.push(n); else d.groupes[+key].push(n);
+}
+function lastSeancesHTML(){
+  const done = S.seances.filter(s=>s.cloturee).slice(0,3);
+  if(!done.length) return "";
+  return `<div class="panel"><div class="eyebrow">Dernières séances</div>${done.map(s=>{ const cl=S.classes.find(c=>c.id===s.classeId); const runs=s.groupes.reduce((t,g)=>t+(g.runs||[]).filter(r=>r.end).length,0); return `<div class="row small"><b class="grow">${esc(cl?cl.nom:"?")} · ${fmtDate(s.date)}</b><span class="muted">${s.groupes.length} groupes · ${runs} parcours</span></div>` }).join("")}<button class="btn ghost sm" data-act="tab" data-k="suivi">Voir le suivi</button></div>`;
+}
+/* binômes : un élève en trop forme un trinôme plutôt que de rester seul */
+function nbGroups(n, taille){ return Math.max(1, taille==2 ? Math.floor(n/2) : Math.round(n/3)) }
+function drawGroups(eleves, taille){
+  const e = shuffle(eleves); const nG = nbGroups(e.length, taille);
+  const gs = Array.from({length:nG},()=>[]);
+  e.forEach((x,i)=>gs[i % nG].push(x));
+  return gs;
+}
+
+/* ================= Parcours (onglet) ================= */
+function viewParcours(){
+  const s = activeSeance();
+  return `
+  <div class="sec-h"><div><div class="eyebrow">Concevoir</div><h2>Générer un parcours</h2><p>Nombre de balises, puis difficulté. Les balises déjà faites par le groupe dans la séance sont évitées.</p></div></div>
+  <div class="cols2">
+    <div class="panel">${wizardHTML("inline")}</div>
+    <div class="panel"><div class="eyebrow">Comment la difficulté est calculée</div>
+      <div class="small">Le logiciel tire des centaines de combinaisons de balises et les classe : <b>70 %</b> selon la distance moyenne entre deux postes, <b>30 %</b> selon l'isolement des postes (1 = sur un chemin ou un repère net, 3 = en sous-bois avec peu de repères). Facile pioche dans le quart le plus simple, Difficile dans le quart le plus exigeant.</div>
+      <div class="small muted">Tu règles l'isolement de chaque balise dans l'onglet Balises. ${s?'':'Lance une séance pour attribuer les parcours à des groupes.'}</div>
+    </div>
+  </div>`;
+}
+
+/* assistant : step 1 nombre, 2 difficulté, 3 résultat */
+function newWiz(groupId){
+  const s = activeSeance(); const g = s && groupId ? s.groupes.find(x=>x.id===groupId) : null;
+  const last = g && g.runs && g.runs.length ? g.runs[g.runs.length-1] : null;
+  return {step:1, n: last? last.n : 6, diff: last? last.diff : 1, groupId: groupId||"", res:null};
+}
+function wizardHTML(where){
+  const w = UI.wiz || (UI.wiz = newWiz());
+  const s = activeSeance();
+  const g = s && w.groupId ? s.groupes.find(x=>x.id===w.groupId) : null;
+  const max = Object.keys(GEO).filter(isActive).length;
+  const steps = `<div class="steps">${[1,2,3].map(i=>`<span class="${w.step>=i?'on':''}"></span>`).join("")}</div>`;
+  const groupSel = s ? `<label class="f">Pour quel groupe ?<select id="w-group" data-act="wiz-groupsel"><option value="">Aucun (simple aperçu)</option>${s.groupes.filter(x=>!x.fini).map(x=>`<option value="${x.id}" ${x.id===w.groupId?'selected':''}>${esc(x.nom)} — ${x.eleves.map(esc).join(", ")}</option>`).join("")}</select></label>` : "";
+  if(w.step===1) return `${steps}${where==="inline"?groupSel:`<div class="small muted">${g?esc(g.nom)+" · "+g.eleves.map(esc).join(", "):""}</div>`}
+    <div class="eyebrow">Étape 1 · Combien de balises à aller chercher ?</div>
+    <div class="stepper"><button class="btn" data-act="wiz-n" data-d="-1" aria-label="Une balise de moins">−</button><output>${w.n}</output><button class="btn" data-act="wiz-n" data-d="1" aria-label="Une balise de plus">+</button></div>
+    <div class="small muted" style="text-align:center">Entre 2 et ${max} balises actives sur la carte</div>
+    <button class="btn primary block" data-act="wiz-next">Suivant : la difficulté</button>`;
+  if(w.step===2) return `${steps}<div class="eyebrow">Étape 2 · Quelle difficulté ? (${w.n} balises)</div>
+    <div class="diffs">${[1,2,3].map(d=>`<button class="diff${w.diff===d?' sel':''}" data-d="${d}" data-act="wiz-diff"><span class="dots"><i></i><i></i><i></i></span><b>${DIFF[d].nom}</b><small>${DIFF[d].txt}</small></button>`).join("")}</div>
+    <div class="row"><button class="btn ghost" data-act="wiz-back">Retour</button><button class="btn primary grow" data-act="wiz-gen">Générer le parcours</button></div>`;
+  const r = w.res;
+  if(!r) return `${steps}<div class="empty"><b>Pas assez de balises actives</b><span>Réactive des balises dans l'onglet Balises.</span></div><button class="btn ghost" data-act="wiz-back">Retour</button>`;
+  return `${steps}<div class="eyebrow">Étape 3 · Parcours ${DIFF[r.diff].nom.toLowerCase()} · ${r.n} balises</div>
+    <div class="stats3"><div><b>${r.dist} m</b><span>à vol d'oiseau</span></div><div><b>${Math.round(r.dist/(r.n+1))} m</b><span>entre 2 postes</span></div><div><b>${r.isoMoy}/3</b><span>isolement moyen</span></div></div>
+    ${r.reused.length?`<div class="note">Plus assez de balises nouvelles pour ce groupe : ${r.reused.join(", ")} déjà faite${r.reused.length>1?'s':''} aujourd'hui.</div>`:''}
+    ${mapHTML(r.seq)}
+    ${legsHTML(r.seq, null)}
+    <div class="row"><button class="btn ghost" data-act="wiz-back">Modifier</button><button class="btn sun" data-act="wiz-gen">Autre tirage</button>
+    ${(g||(where==="inline"&&w.groupId)) ? `<button class="btn primary grow" data-act="wiz-assign">Attribuer à ${esc((g||{}).nom||"")}</button>` : ''}</div>
+    ${where==="inline" && s && !w.groupId ? groupSel : ''}`;
+}
+function legsHTML(seq, run){
+  let prev = pt("D");
+  return `<div class="legs">${seq.map((n,i)=>{
+    const b = bal(n); const d = Math.round(dist(prev, GEO[n])); prev = GEO[n];
+    const info = [b.poteau&&("Poteau "+b.poteau), b.pince&&("Pince "+b.pince), b.animal, b.sigle].filter(Boolean).map(esc).join(" · ") || "Codes à renseigner dans l'onglet Balises";
+    const v = run && run.valid ? run.valid[n] : undefined;
+    const ctrl = run ? `<div class="vbtns"><button class="chip-btn${v===true?' on-ok':''}" data-act="val" data-b="${n}" data-v="1" aria-label="Poinçon correct, balise ${n}">✓</button><button class="chip-btn${v===false?' on-ko':''}" data-act="val" data-b="${n}" data-v="0" aria-label="Poinçon faux ou absent, balise ${n}">✗</button></div>` : `<span class="small muted">${d} m</span>`;
+    return `<div class="leg"><span class="ord">${i+1}</span>${schemaBox(n)}<div style="min-width:0"><div class="num">Balise ${n} <span class="muted small">· isolement ${iso(n)}/3${run?` · ${d} m`:''}</span></div><div class="meta">${info}</div>${b.remarque?`<div class="meta" style="color:var(--warn)">${esc(b.remarque)}</div>`:''}</div>${ctrl}</div>`;
+  }).join("")}</div>`;
+}
+
+/* ================= Classes ================= */
+function viewClasses(){
+  const e = UI.editClasse;
+  const form = e ? `<div class="panel"><div class="eyebrow">${e.id?'Modifier la classe':'Nouvelle classe'}</div>
+      <div class="row"><label class="f grow">Nom de la classe<input type="text" id="c-nom" value="${esc(e.nom)}" placeholder="5e B"></label>
+      <label class="f" style="width:190px">Barème d'évaluation<select id="c-cycle"><option value="3" ${classCycle(e)==3?'selected':''}>Cycle 3 (6ᵉ)</option><option value="4" ${classCycle(e)==4?'selected':''}>Cycle 4 (5ᵉ à 3ᵉ)</option></select></label></div>
+      <label class="f">Élèves, un par ligne<textarea id="c-eleves" placeholder="Prénom Nom">${esc(e.eleves.join("\n"))}</textarea></label>
+      <div class="small muted">Tu peux coller directement une colonne copiée depuis Pronote ou un tableur.</div>
+      <div class="row"><button class="btn ghost" data-act="c-cancel">Annuler</button>${e.id?`<button class="btn ghost" data-act="c-del" style="color:var(--red)">${e.confirmDel?'Confirmer la suppression':'Supprimer'}</button>`:''}<button class="btn primary grow" data-act="c-save">Enregistrer</button></div></div>` : "";
+  return `
+  <div class="sec-h"><div><div class="eyebrow">Classes</div><h2>Mes classes</h2><p>Les groupes sont tirés au sort à chaque séance depuis ces listes.</p></div>${e?'':'<button class="btn primary sm" data-act="c-new">Ajouter une classe</button>'}</div>
+  ${form}
+  ${S.classes.length ? `<div class="groups">${S.classes.map(c=>{ const n = S.seances.filter(s=>s.classeId===c.id).length; return `<article class="gcard"><div class="gname">${esc(c.nom)}</div><div class="gstud">${c.eleves.length} élèves · ${n} séance${n>1?'s':''} · ${CYCLES[classCycle(c)].nom}</div><div class="small muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.eleves.slice(0,6).map(esc).join(", ")}${c.eleves.length>6?"…":""}</div><div class="gact"><button class="btn ghost sm" data-act="c-edit" data-c="${c.id}">Modifier</button><button class="btn ghost sm" data-act="c-suivi" data-c="${c.id}">Suivi</button></div></article>` }).join("")}</div>`
+  : (e?'':`<div class="empty"><b>Aucune classe</b><span>Crée ta première classe en collant la liste des élèves.</span><button class="btn primary" data-act="c-new">Ajouter une classe</button></div>`)}`;
+}
+
+/* ================= Suivi ================= */
+function viewSuivi(){
+  if(!S.classes.length) return `<div class="sec-h"><div><div class="eyebrow">Suivi</div><h2>Suivi de séance en séance</h2></div></div><div class="empty"><b>Rien à suivre pour l'instant</b><span>Le suivi apparaît après ta première séance.</span></div>`;
+  const cid = UI.suiviClasse && S.classes.find(c=>c.id===UI.suiviClasse) ? UI.suiviClasse : S.classes[0].id;
+  const cl = S.classes.find(c=>c.id===cid);
+  const ses = S.seances.filter(s=>s.classeId===cid).sort((a,b)=>a.date-b.date);
+  const st = {}; cl.eleves.forEach(e=>st[e]={pres:0,parc:0,ok:0,tent:0,temps:0,dmax:0});
+  ses.forEach(s=>s.groupes.forEach(g=>{ g.eleves.forEach(e=>{ if(!st[e]) st[e]={pres:0,parc:0,ok:0,tent:0,temps:0,dmax:0}; const x=st[e]; x.pres++; (g.runs||[]).filter(r=>r.end).forEach(r=>{ x.parc++; x.ok+=okCount(r); x.cpt=(x.cpt||0)+counted(r); x.tent+=r.n; x.temps+=r.end-r.start; x.dmax=Math.max(x.dmax,r.diff) }) }) }));
+  const rows = Object.entries(st).sort((a,b)=>a[0].localeCompare(b[0],"fr"));
+  return `
+  <div class="sec-h"><div><div class="eyebrow">Suivi</div><h2>Suivi de séance en séance</h2></div>
+    <label class="f" style="width:220px">Classe<select id="s-classe" data-act="suivi-classe">${S.classes.map(c=>`<option value="${c.id}" ${c.id===cid?'selected':''}>${esc(c.nom)}</option>`).join("")}</select></label></div>
+  <div class="panel"><div class="eyebrow">Par élève · ${ses.length} séance${ses.length>1?'s':''}</div>
+  <div class="tbl-wrap"><table><thead><tr><th>Élève</th><th>Séances</th><th>Parcours</th><th>Balises validées</th><th>Comptées (temps)</th><th>Réussite</th><th>Niveau max</th><th>Temps total</th></tr></thead><tbody>
+  ${rows.map(([e,x])=>`<tr><td><b>${esc(e)}</b></td><td class="n">${x.pres}</td><td class="n">${x.parc}</td><td class="n">${x.ok}/${x.tent}</td><td class="n">${x.cpt!=null?fmtPts(x.cpt):"–"}</td><td class="n">${x.tent?Math.round(100*x.ok/x.tent)+" %":"–"}</td><td>${x.dmax?DIFF[x.dmax].nom:"–"}</td><td class="n">${x.temps?fmtTime(x.temps):"–"}</td></tr>`).join("")}
+  </tbody></table></div></div>
+  <div class="panel"><div class="eyebrow">Par séance</div>
+  ${ses.length? ses.slice().reverse().map(s=>`<details><summary style="cursor:pointer;font-weight:700;padding:6px 0">${fmtDate(s.date)} · ${s.groupes.length} groupes ${s.cloturee?'':'<span class="pill run"><i></i>en cours</span>'}</summary>
+    <div class="tbl-wrap" style="margin-top:6px"><table><thead><tr><th>Groupe</th><th>Élèves</th><th>Parcours</th><th>Validées</th><th>Temps</th><th></th></tr></thead><tbody>
+    ${s.groupes.map(g=>{ const rs=(g.runs||[]).filter(r=>r.end); return `<tr><td>${esc(g.nom)}</td><td>${g.eleves.map(esc).join(", ")}</td><td>${rs.map(r=>DIFF[r.diff].nom[0]+r.n).join(" · ")||"–"}</td><td class="n">${rs.reduce((t,r)=>t+okCount(r),0)}/${rs.reduce((t,r)=>t+r.n,0)}</td><td class="n">${rs.length?fmtTime(rs.reduce((t,r)=>t+r.end-r.start,0)):"–"}</td><td>${g.fini?'<span class="pill done">présent</span>':''}</td></tr>` }).join("")}
+    </tbody></table></div>${s.cloturee?`<div class="row" style="margin-top:8px"><button class="btn ghost sm" data-act="del-seance" data-s="${s.id}">${UI.confirmDelSeance===s.id?'Confirmer la suppression':'Supprimer cette séance'}</button></div>`:''}</details>`).join("") : '<div class="small muted">Aucune séance pour cette classe.</div>'}
+  </div>`;
+}
+
+/* ================= Évaluation ================= */
+function viewEval(){
+  if(!S.classes.length) return `<div class="sec-h"><div><div class="eyebrow">Évaluation</div><h2>Fiche d'évaluation</h2></div></div><div class="empty"><b>Aucune classe</b><span>Ajoute une classe pour l'évaluer.</span><button class="btn primary" data-act="tab" data-k="classes">Ajouter une classe</button></div>`;
+  const cid = UI.evalClasse && S.classes.find(c=>c.id===UI.evalClasse) ? UI.evalClasse : S.classes[0].id;
+  const cl = S.classes.find(c=>c.id===cid), cyc = classCycle(cl), C = CYCLES[cyc];
+  const notes = cl.eleves.slice().sort((a,b)=>a.localeCompare(b,"fr")).map(e=>[e, noteEleve(cl,e)]);
+  const done = notes.filter(([,n])=>n.complete), moy = done.length ? done.reduce((t,[,n])=>t+n.total,0)/done.length : null;
+  const dist = [1,2,3,4].map(l=>done.filter(([,n])=>n.lv===l).length);
+  const rubTitles = [`Efficacité et temps · 10 pts`, ...C.rubs.map(r=>`${r.nom} · ${r.pts} pts`)];
+  return `
+  <div class="sec-h"><div><div class="eyebrow">Évaluation · ${C.nom}</div><h2>Fiche d'évaluation</h2><p>Efficacité calculée automatiquement ; les autres rubriques se notent d'un geste.</p></div>
+    <label class="f" style="width:220px">Classe<select id="e-classe" data-act="eval-classe">${S.classes.map(c=>`<option value="${c.id}" ${c.id===cid?'selected':''}>${esc(c.nom)}</option>`).join("")}</select></label></div>
+  <div class="kpis">
+    <div class="kpi"><b>${done.length}/${notes.length}</b><span>fiches complètes</span></div>
+    <div class="kpi"><b>${moy==null?"–":fmtPts(Math.round(moy*10)/10)}</b><span>moyenne /20</span></div>
+    <div class="kpi"><b>${dist[2]+dist[3]}</b><span>MS ou TBM</span></div>
+    <div class="kpi"><b>${dist[0]+dist[1]}</b><span>MI ou MF</span></div>
+  </div>
+  <div class="row"><button class="btn ghost sm" data-act="eval-copy">Copier les notes (Pronote, tableur)</button><span class="small muted">Barème : ${CYCLES[cyc].nom}. À changer dans l'onglet Classes.</span></div>
+  ${baremeHTML(cyc)}
+  <div class="evgrid">${notes.map(([e,n])=>evCard(cl,e,n)).join("")}</div>`;
+}
+function evCard(cl, e, n){
+  const ef = n.ef;
+  const efTxt = ef ? `<div class="seslist">${ef.last3.map(x=>`<span class="${ef.kept.includes(x)?'kept':''}" title="${fmtPts(x.r.B)} balises comptées · ${Math.round(x.r.P)} % · limité par ${x.r.lim}">${fmtDate(x.s.date)} · ${fmtPts(x.r.sc/4*10)}</span>`).join("")}</div>
+      <div class="rub-d">${(()=>{ const best = ef.kept[0].r; return `Meilleure séance : ${fmtPts(best.B)} balises comptées, ${Math.round(best.P)} % de réussite. Limité par la ${best.lim}.` })()}</div>`
+    : `<div class="rub-d">Aucune séance terminée pour l'instant.</div>`;
+  return `<article class="evcard">
+    <div class="evhead"><div style="min-width:0"><div class="gname">${esc(e)}</div><span class="lvl" data-l="${n.complete?n.lv:0}">${n.complete?LEVELS[n.lv]:"Fiche incomplète"}</span></div>
+      <div class="note20">${fmtPts(n.total)}<small>/20</small></div></div>
+    <div class="rub"><div class="rub-h">Efficacité et temps <span><span class="lvl" data-l="${ef?ef.lv:0}">${ef?LV_SHORT[ef.lv]:"–"}</span> <b>${ef?fmtPts(Math.round(ef.pts*100)/100):"–"}/10</b></span></div>${efTxt}</div>
+    ${n.rubs.map(r=>`<div class="rub"><div class="rub-h">${esc(r.nom)} <b>${r.l?fmtPts(r.pts):"–"}/${r.max}</b></div>
+      <div class="lv" role="group" aria-label="${esc(r.nom)}">${[1,2,3,4].map(l=>`<button class="${r.l===l?'on':''}" data-l="${l}" data-act="eval-set" data-e="${esc(e)}" data-r="${r.id}" aria-pressed="${r.l===l}" title="${esc(LEVELS[l])} : ${esc(r.d[l-1])}">${LV_SHORT[l]}</button>`).join("")}</div>
+      ${r.l?`<div class="rub-d">${esc(r.d[r.l-1])}</div>`:''}</div>`).join("")}
+  </article>`;
+}
+function baremeHTML(cyc){
+  const C = CYCLES[cyc], hdr = `<tr><th></th>${[1,2,3,4].map(l=>`<th>${LEVELS[l]}</th>`).join("")}</tr>`;
+  const knots = k => [`moins de ${k[1]}`, `${k[1]} à ${k[2]-1}`, `${k[2]} à ${k[3]-1}`, `${k[3]} et plus`];
+  return `<details class="panel"><summary>Barème et échelles descriptives</summary>
+    <div class="small"><b>Efficacité et temps (10 pts)</b> : calculée sur la moyenne des 2 meilleures séances parmi les 3 dernières de l'élève. Le niveau de chaque séance est le plus bas des trois critères ci-dessous ; à l'intérieur d'un niveau, les points progressent avec le résultat.</div>
+    <div class="small"><b>Temps cible</b> : 3 min par balise en Facile, 3 min 30 en Moyen, 4 min en Difficile. Au-delà, les balises validées comptent au prorata (temps cible ÷ temps réel) et le parcours ne peut pas remplir une condition « réussi ».</div>
+    <div class="tbl-wrap"><table class="scale"><thead>${hdr}</thead><tbody>
+      <tr><td>Balises comptées par séance</td>${knots(C.kB).map(t=>`<td>${t}</td>`).join("")}</tr>
+      <tr><td>Réussite (validées ÷ cherchées)</td>${knots(C.kP).map((t,i)=>`<td>${t.replace(/(\d+)/g,"$1 %").replace("% à","à")}</td>`).join("")}</tr>
+      <tr><td>Condition</td><td>—</td>${C.cond.slice(1).map(t=>`<td>${t}</td>`).join("")}</tr>
+      ${C.rubs.map(r=>`<tr><td>${esc(r.nom)} (${r.pts} pts)</td>${r.d.map(t=>`<td>${esc(t)}</td>`).join("")}</tr>`).join("")}
+    </tbody></table></div>
+    <div class="small muted">Rubriques observées : MI = 25 %, MF = 50 %, MS = 75 %, TBM = 100 % des points. Niveau global : moins de 5 = MI, 5 à 9,5 = MF, 10 à 14,5 = MS, 15 et plus = TBM. Note arrondie au demi-point.</div>
+  </details>`;
+}
+
+/* ================= Balises ================= */
+const BCOLS = [["poteau","Code poteau"],["pince","Code pince"],["animal","Animal"],["sigle","Sigle"],["schema","Schéma"],["remarque","Remarque"]];
+function viewBalises(){
+  const nums = Object.keys(GEO).map(Number).sort((a,b)=>a-b);
+  const nb = Object.keys(S.balises).length;
+  return `
+  <div class="sec-h"><div><div class="eyebrow">Balises · Zone Nord</div><h2>Fiche des postes</h2><p>Ce tableau sert de corrigé. Mets-le à jour quand une pince est remplacée : les parcours affichent toujours la dernière version.</p></div></div>
+  ${nb? '' : `<div class="note">Les codes des balises ne sont pas encore chargés. Importe ton Google Sheet ci-dessous, ou complète le tableau à la main.</div>`}
+  <div class="panel">
+    <div class="row" style="justify-content:space-between"><div class="eyebrow">Mettre à jour depuis Google Sheets</div></div>
+    <div class="small">Dans ton Google Sheet, sélectionne tout le tableau avec la ligne d'en-tête, copie-le, puis colle-le ici. Colonnes reconnues : Balise, Code poteau, Code pince, Animal, Sigle, Schéma, Isolement, Active, Remarque.</div>
+    <textarea id="imp" placeholder="Balise&#9;Code poteau&#9;Code pince&#9;…"></textarea>
+    <div class="row"><button class="btn primary" data-act="import">Importer</button><button class="btn ghost" data-act="export">Copier le tableau pour Google Sheets</button></div>
+  </div>
+  <div class="tbl-wrap"><table><thead><tr><th>N°</th><th>Active</th><th>Isolement</th>${BCOLS.map(c=>`<th>${c[1]}</th>`).join("")}</tr></thead><tbody>
+  ${nums.map(n=>{ const b = bal(n); return `<tr class="${isActive(n)?'':'off'}"><td class="n"><b>${n}</b></td>
+    <td><input type="checkbox" id="b-act-${n}" data-act="b-active" data-b="${n}" ${isActive(n)?'checked':''} aria-label="Balise ${n} active" style="width:22px;height:22px"></td>
+    <td><select id="b-iso-${n}" data-act="b-iso" data-b="${n}" aria-label="Isolement balise ${n}">${[1,2,3].map(v=>`<option value="${v}" ${iso(n)===v?'selected':''}>${v}</option>`).join("")}</select></td>
+    ${BCOLS.map(([k])=> k==="schema" ? `<td><button class="schema schema-btn${b.schema?'':' none'}" data-act="schema-edit" data-b="${n}" aria-label="Modifier le schéma de la balise ${n}">${schemaSVG(b.schema)||"saisir"}</button></td>` : `<td><input type="text" id="b-${k}-${n}" data-act="b-field" data-b="${n}" data-k="${k}" value="${esc(b[k]||"")}" ${k==="remarque"?'style="min-width:220px"':''}></td>`).join("")}</tr>` }).join("")}
+  </tbody></table></div>
+  <div class="cols2">
+    <div class="panel"><div class="eyebrow">Point de départ et d'arrivée</div><div class="small">Touche la carte à l'endroit du départ (triangle). Il sert au calcul des distances.</div>${mapHTML([], {pick:true, all:true})}</div>
+    <div class="panel"><div class="eyebrow">À savoir</div>
+      <div class="small">La balise <b>1</b> figure dans la fiche des poinçons mais n'a pas de cercle sur la carte Zone Nord : elle n'est pas proposée dans les parcours.</div>
+      <div class="small">Les balises 5 et 30 portent toutes deux le code poteau B33 dans la fiche du 06/09/26. Vérifie sur le terrain.</div>
+      <div class="small muted">Données : ${MODE==="cloud"?"synchronisées entre tes appareils.":"gardées sur cet appareil uniquement."}</div>
+    </div>
+  </div>`;
+}
+function parseSheet(txt){
+  const lines = txt.replace(/\r/g,"").split("\n").filter(l=>l.trim());
+  if(lines.length<2) return [];
+  const sep = lines[0].includes("\t") ? "\t" : (lines[0].split(";").length > lines[0].split(",").length ? ";" : ",");
+  const split = l => { if(sep==="\t") return l.split("\t"); const out=[]; let cur="", q=false; for(const ch of l){ if(ch==='"'){q=!q;continue} if(ch===sep&&!q){out.push(cur);cur="";continue} cur+=ch } out.push(cur); return out };
+  const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").trim();
+  const head = split(lines[0]).map(norm);
+  const find = (...keys) => head.findIndex(h=>keys.some(k=>h.includes(k)));
+  const idx = {num:find("balise","n°","no","num"), poteau:find("poteau"), pince:find("pince"), animal:find("animal"), sigle:find("sigle"), schema:find("schema"), iso:find("isol"), actif:find("activ"), remarque:find("remarq","note")};
+  return lines.slice(1).map(l=>{ const c = split(l).map(x=>x.trim()); const num = parseInt(c[idx.num]); if(!num) return null;
+    const o = {num}; ["poteau","pince","animal","sigle","schema","remarque"].forEach(k=>{ if(idx[k]>=0) o[k]=c[idx[k]]||"" });
+    if(idx.iso>=0){ const v=parseInt(c[idx.iso]); if(v>=1&&v<=3) o.iso=v }
+    if(idx.actif>=0){ const a = norm(c[idx.actif]||""); o.actif = !(a==="non"||a==="no"||a==="0"||a==="false"||a==="faux") }
+    return o }).filter(Boolean);
+}
+
+/* ================= Modale ================= */
+let modalFn = null;
+function openModal(fn){ modalFn = fn; renderModal() }
+function closeModal(){ modalFn = null; document.getElementById("modal-root").innerHTML = ""; UI.modalWiz = false }
+function renderModal(){
+  if(!modalFn) return;
+  const sc = document.querySelector(".sheet"); const top = sc ? sc.scrollTop : 0;
+  document.getElementById("modal-root").innerHTML = `<div class="modal" data-act="modal-bg"><div class="sheet" role="dialog" aria-modal="true">${modalFn()}</div></div>`;
+  const ns = document.querySelector(".sheet"); if(ns) ns.scrollTop = top;
+  tick();
+}
+function sheetHead(t, sub){ return `<div class="sheet-h"><div><h3>${t}</h3>${sub?`<div class="small muted">${sub}</div>`:''}</div><button class="x" data-act="close" aria-label="Fermer">✕</button></div>` }
+
+function modalRun(gid, rid){
+  return ()=>{
+    const s = S.seances.find(x=>x.groupes.some(g=>g.id===gid)); if(!s) return sheetHead("Introuvable");
+    const g = s.groupes.find(x=>x.id===gid); const r = (g.runs||[]).find(x=>x.id===rid); if(!r) return sheetHead("Introuvable");
+    const i = g.runs.indexOf(r)+1;
+    return `${sheetHead(`${esc(g.nom)} · Parcours ${i}`, `${r.n} balises · ${DIFF[r.diff].nom} · ${r.dist} m · ${g.eleves.map(esc).join(", ")}`)}${mapHTML(r.seq, {valid:r.valid})}${legsHTML(r.seq,null)}`;
+  };
+}
+function modalCorrect(gid, rid){
+  return ()=>{
+    const s = S.seances.find(x=>x.groupes.some(g=>g.id===gid)); if(!s) return sheetHead("Introuvable");
+    const g = s.groupes.find(x=>x.id===gid); const r = (g.runs||[]).find(x=>x.id===rid); if(!r) return sheetHead("Introuvable");
+    const i = g.runs.indexOf(r)+1, isLast = r===g.runs[g.runs.length-1] && !s.cloturee;
+    const ok = okCount(r), ko = r.seq.filter(b=>r.valid&&r.valid[b]===false).length;
+    return `${sheetHead(`${esc(g.nom)} · Parcours ${i}`, `${g.eleves.map(esc).join(", ")}`)}
+      <div class="stats3"><div><b style="color:${r.end&&!inTime(r)?'var(--red)':'inherit'}">${r.end?fmtTime(r.end-r.start):"–"}</b><span>cible ${fmtTime(cibleMs(r))}</span></div><div><b style="color:var(--ok)">${ok}/${r.n}</b><span>validées</span></div><div><b style="color:var(--ko)">${ko}</b><span>refusées</span></div></div>
+      ${r.end && !inTime(r) ? `<div class="note">Temps dépassé : ${fmtTime(runTime(r)-cibleMs(r))} de trop. Les balises validées comptent pour ${Math.round(coefTemps(r)*100)} % dans l'évaluation (${fmtPts(counted(r))} balise${counted(r)>=2?'s':''} sur ${okCount(r)}).</div>` : ''}
+      <div class="small muted">Compare le carton du groupe à la fiche, puis touche ✓ ou ✗ pour chaque balise.</div>
+      <div class="row"><button class="btn ghost sm" data-act="val-all" data-g="${g.id}" data-r="${r.id}">Tout valider</button></div>
+      <div data-g="${g.id}" data-r="${r.id}" id="corr">${legsHTML(r.seq, r)}</div>
+      ${mapHTML(r.seq, {valid:r.valid})}
+      ${isLast && !g.fini ? `<div class="eyebrow">Et maintenant ?</div><div class="row"><button class="btn primary grow" data-act="after-new" data-g="${g.id}">Nouveau parcours</button><button class="btn go grow" data-act="after-end" data-g="${g.id}">Terminer la séance</button></div>` : `<button class="btn ghost" data-act="close">Fermer</button>`}`;
+  };
+}
+function modalWiz(){ return ()=>{ const s=activeSeance(); const g = s && UI.wiz.groupId ? s.groupes.find(x=>x.id===UI.wiz.groupId) : null; return `${sheetHead(g?`Parcours pour ${esc(g.nom)}`:"Nouveau parcours", g?g.eleves.map(esc).join(", "):"")}${wizardHTML("modal")}` } }
+function modalSchema(n){
+  return ()=>{
+    const ed = UI.schemaEd; const pts = ed.pts;
+    const has = (x,y)=>pts.some(p=>Math.abs(p[0]-x)<.01&&Math.abs(p[1]-y)<.01);
+    let cells = "";
+    for(let gy=0; gy<9; gy++) for(let gx=0; gx<9; gx++){ const x=gx/2, y=gy/2, on=has(x,y); cells += `<button class="${on?'on':''}${gx%2===0&&gy%2===0?' whole':''}" data-act="schema-tog" data-x="${x}" data-y="${y}" aria-pressed="${on}" aria-label="Point colonne ${gx+1}, ligne ${gy+1}"></button>` }
+    const str = fmtSchema(pts);
+    return `${sheetHead(`Schéma de la balise ${n}`, "Touche les cases pour reproduire les picots de la pince.")}
+      <div class="row" style="justify-content:center;gap:16px"><span class="schema schema-big${str?'':' none'}">${schemaSVG(str)||"vide"}</span><div class="small muted" style="max-width:200px">Aperçu tel qu'il s'affichera dans la correction. ${pts.length} point${pts.length>1?'s':''}.</div></div>
+      ${ed.snapped?`<div class="note">Dans la grille, certains points sont arrondis à la case la plus proche. Si tu enregistres sans rien toucher, le schéma d'origine est conservé.</div>`:''}
+      <div class="sgrid">${cells}</div>
+      <div class="small muted" style="text-align:center">Les gros repères marquent un écart complet entre deux picots, les petits un demi-écart.</div>
+      <div class="row"><button class="btn ghost" data-act="schema-clear">Effacer</button><button class="btn ghost grow" data-act="close">Annuler</button><button class="btn primary grow" data-act="schema-save">Enregistrer</button></div>`;
+  };
+}
+function modalConfirm(title, txt, act, label){ return ()=>`${sheetHead(title)}<div>${txt}</div><div class="row"><button class="btn ghost grow" data-act="close">Annuler</button><button class="btn stop grow" data-act="${act}">${label}</button></div>` }
+
+/* ================= Actions ================= */
+function seanceOf(gid){ return S.seances.find(x=>x.groupes.some(g=>g.id===gid)) }
+async function mutateSeance(s, fn){ const c = clone(s); fn(c); Object.assign(s, c); scheduleRender(); await putDoc("seances", s.id, c) }
+
+document.addEventListener("click", async ev=>{
+  const el = ev.target.closest("[data-act]"); if(!el) return;
+  const a = el.dataset.act, ds = el.dataset;
+  if(a==="modal-bg"){ if(ev.target===el) closeModal(); return }
+  if(["draft-classe","draft-taille","wiz-groupsel","suivi-classe","eval-classe","b-active","b-iso","b-field"].includes(a)) return;
+  if(a==="pick-depart"){
+    const rect = el.getBoundingClientRect(); const x = Math.round((ev.clientX-rect.left)/rect.width*MAP_W), y = Math.round((ev.clientY-rect.top)/rect.height*MAP_H);
+    S.config = {...S.config, depart:{x,y}}; render(); await putDoc("config","app",{...S.config}); toast("Départ déplacé"); return;
+  }
+  switch(a){
+    case "tab": UI.tab = ds.k; closeModal(); render(); window.scrollTo(0,0); break;
+    case "close": closeModal(); break;
+    case "draw": { const d = UI.draft; const cl = S.classes.find(c=>c.id===d.classeId); if(!cl.eleves.length){ toast("Cette classe n'a pas d'élèves."); break } d.groupes = drawGroups(cl.eleves, d.taille); d.pool = []; d.sel = null; d.mode = "hasard"; render(); break }
+    case "manual": { const d = UI.draft; const cl = S.classes.find(c=>c.id===d.classeId); if(!cl.eleves.length){ toast("Cette classe n'a pas d'élèves."); break }
+      d.groupes = Array.from({length:nbGroups(cl.eleves.length, d.taille)},()=>[]); d.pool = cl.eleves.slice().sort((a,b)=>a.localeCompare(b,"fr")); d.sel = null; d.mode = "manuel"; render(); break }
+    case "pick-stu": { const d = UI.draft; const n = ds.n;
+      if(!d.sel) d.sel = n;
+      else if(d.sel===n) d.sel = null;
+      else if(draftWhere(d,n)===draftWhere(d,d.sel)) d.sel = n;
+      else { draftMove(d, d.sel, draftWhere(d,n)); d.sel = null }
+      render(); break }
+    case "drop": { const d = UI.draft; if(!d.sel) break; draftMove(d, d.sel, ds.i); d.sel = null; render(); break }
+    case "add-grp": UI.draft.groupes.push([]); render(); break;
+    case "fill-rand": { const d = UI.draft; shuffle(d.pool).forEach(n=>{ const t = d.groupes.reduce((bi,g,i)=>g.length<d.groupes[bi].length?i:bi, 0); d.groupes[t].push(n) }); d.pool = []; d.sel = null; render(); break }
+    case "start-seance": { const d = UI.draft; const s = {id:uid(), classeId:d.classeId, date:Date.now(), taille:d.taille, cloturee:false,
+        groupes:d.groupes.filter(e=>e.length).map((e,i)=>({id:uid(), nom:"Groupe "+(i+1), eleves:e, runs:[], fini:false}))};
+        UI.draft = null; S.seances.unshift(s); render(); await putDoc("seances", s.id, s); toast("Séance démarrée"); break }
+    case "close-seance": openModal(modalConfirm("Clôturer la séance ?","Les chronos en cours seront arrêtés. La séance reste consultable dans le suivi.","do-close-seance","Clôturer")); break;
+    case "do-close-seance": { const s = activeSeance(); if(!s) break; closeModal(); const now = Date.now(); await mutateSeance(s, c=>{ c.cloturee = true; c.groupes.forEach(g=>{ const r=g.runs[g.runs.length-1]; if(r&&r.start&&!r.end) r.end=now }) }); toast("Séance clôturée"); break }
+    case "wiz-group": UI.wiz = newWiz(ds.g); UI.modalWiz = true; openModal(modalWiz()); break;
+    case "start": { const s = seanceOf(ds.g); await mutateSeance(s, c=>{ const g=c.groupes.find(x=>x.id===ds.g); const r=g.runs[g.runs.length-1]; r.start=Date.now() }); break }
+    case "arrive": { const s = seanceOf(ds.g); let rid; await mutateSeance(s, c=>{ const g=c.groupes.find(x=>x.id===ds.g); const r=g.runs[g.runs.length-1]; r.end=Date.now(); rid=r.id }); openModal(modalCorrect(ds.g, rid)); break }
+    case "show-run": openModal(modalRun(ds.g, ds.r)); break;
+    case "correct": openModal(modalCorrect(ds.g, ds.r)); break;
+    case "val": case "val-all": {
+      const wrap = el.closest("[data-r]"); const gid = ds.g || wrap.dataset.g, rid = ds.r || wrap.dataset.r; const s = seanceOf(gid);
+      await mutateSeance(s, c=>{ const r = c.groupes.find(x=>x.id===gid).runs.find(x=>x.id===rid); r.valid = r.valid||{};
+        if(a==="val-all") r.seq.forEach(b=>r.valid[b]=true);
+        else { const v = ds.v==="1"; r.valid[ds.b] = (r.valid[ds.b]===v) ? null : v; if(r.valid[ds.b]===null) delete r.valid[ds.b] } });
+      break }
+    case "after-new": UI.wiz = newWiz(ds.g); UI.wiz.step = 1; UI.modalWiz = true; openModal(modalWiz()); break;
+    case "after-end": { const s = seanceOf(ds.g); closeModal(); await mutateSeance(s, c=>{ c.groupes.find(x=>x.id===ds.g).fini = true }); toast("Groupe marqué présent"); break }
+    case "reopen": { const s = seanceOf(ds.g); await mutateSeance(s, c=>{ const g=c.groupes.find(x=>x.id===ds.g); g.fini=false }); break }
+    case "wiz-n": { const max = Object.keys(GEO).filter(isActive).length; UI.wiz.n = Math.max(2, Math.min(max, UI.wiz.n + (+ds.d))); rerenderWiz(); break }
+    case "wiz-next": UI.wiz.step = 2; rerenderWiz(); break;
+    case "wiz-back": UI.wiz.step = Math.max(1, UI.wiz.step-1); rerenderWiz(); break;
+    case "wiz-diff": UI.wiz.diff = +ds.d; rerenderWiz(); break;
+    case "wiz-gen": { const s = activeSeance(); const g = s && UI.wiz.groupId ? s.groupes.find(x=>x.id===UI.wiz.groupId) : null;
+      UI.wiz.res = generate(UI.wiz.n, UI.wiz.diff, g ? usedBy(g) : new Set()); UI.wiz.step = 3; rerenderWiz(); break }
+    case "wiz-assign": { const s = activeSeance(); const w = UI.wiz; if(!s||!w.groupId||!w.res) break;
+      const run = {id:uid(), seq:w.res.seq, n:w.res.n, diff:w.res.diff, dist:w.res.dist, start:null, end:null, valid:{}};
+      const gname = (s.groupes.find(x=>x.id===w.groupId)||{}).nom;
+      await mutateSeance(s, c=>{ const g=c.groupes.find(x=>x.id===w.groupId); g.runs.push(run); g.fini=false });
+      UI.wiz = null; closeModal(); if(UI.tab!=="seance"){ UI.tab="seance" } render(); toast(`Parcours attribué à ${gname}`); break }
+    case "c-new": UI.editClasse = {id:null, nom:"", eleves:[]}; render(); break;
+    case "c-edit": { const c = S.classes.find(x=>x.id===ds.c); UI.editClasse = clone(c); render(); break }
+    case "c-cancel": UI.editClasse = null; render(); break;
+    case "c-save": { const nom = document.getElementById("c-nom").value.trim(); const eleves = document.getElementById("c-eleves").value.split("\n").map(x=>x.replace(/\t/g," ").trim()).filter(Boolean);
+      if(!nom){ toast("Donne un nom à la classe."); break } const c = {id:UI.editClasse.id||uid(), nom, cycle:+document.getElementById("c-cycle").value, eleves: [...new Set(eleves)]};
+      UI.editClasse = null; const i = S.classes.findIndex(x=>x.id===c.id); if(i>=0) S.classes[i]=c; else S.classes.push(c); render(); await putDoc("classes", c.id, c); toast("Classe enregistrée"); break }
+    case "c-del": { const e = UI.editClasse; if(!e.confirmDel){ e.nom = document.getElementById("c-nom").value; e.cycle = +document.getElementById("c-cycle").value; e.eleves = document.getElementById("c-eleves").value.split("\n"); e.confirmDel = true; render(); break }
+      UI.editClasse = null; S.classes = S.classes.filter(x=>x.id!==e.id); render(); await delDoc("classes", e.id); toast("Classe supprimée"); break }
+    case "c-suivi": UI.suiviClasse = ds.c; UI.tab = "suivi"; render(); break;
+    case "del-seance": if(UI.confirmDelSeance!==ds.s){ UI.confirmDelSeance = ds.s; render(); break } UI.confirmDelSeance=null; S.seances = S.seances.filter(x=>x.id!==ds.s); render(); await delDoc("seances", ds.s); toast("Séance supprimée"); break;
+    case "import": { const rows = parseSheet(document.getElementById("imp").value); if(!rows.length){ toast("Rien à importer : vérifie que la ligne d'en-tête est copiée."); break }
+      let n=0; for(const r of rows){ const cur = S.balises[r.num] || {num:r.num}; const nb = {...cur, ...r}; S.balises[r.num] = nb; try{ await putDoc("balises","b"+r.num, nb); n++ }catch(e){ break } }
+      render(); toast(`${n} balise${n>1?'s':''} mise${n>1?'s':''} à jour`); break }
+    case "schema-edit": { const n=+ds.b; const orig = parseSchema(bal(n).schema);
+      const P = orig.map(p=>[Math.round(p[0]*2)/2, Math.round(p[1]*2)/2]);
+      const mx = P.length?Math.min(...P.map(p=>p[0])):0, my = P.length?Math.min(...P.map(p=>p[1])):0;
+      const pts = []; P.forEach(p=>{ const q=[Math.min(4,p[0]-mx), Math.min(4,p[1]-my)]; if(!pts.some(r=>r[0]===q[0]&&r[1]===q[1])) pts.push(q) });
+      UI.schemaEd = {n, pts, orig:bal(n).schema||"", touched:false, snapped: orig.some(p=>p[0]*2%1!==0||p[1]*2%1!==0)};
+      openModal(modalSchema(n)); break }
+    case "schema-tog": { const ed = UI.schemaEd; const x=+ds.x, y=+ds.y; const i = ed.pts.findIndex(p=>Math.abs(p[0]-x)<.01&&Math.abs(p[1]-y)<.01);
+      if(i>=0) ed.pts.splice(i,1); else { if(ed.pts.some(p=>Math.hypot(p[0]-x,p[1]-y)<.6)){ toast("Trop près d'un autre point."); break } ed.pts.push([x,y]) }
+      ed.touched = true; ed.snapped = false; renderModal(); break }
+    case "schema-clear": UI.schemaEd.pts = []; UI.schemaEd.touched = true; renderModal(); break;
+    case "schema-save": { const ed = UI.schemaEd; const n = ed.n; closeModal();
+      const val = ed.touched ? fmtSchema(ed.pts.slice().sort((a,b)=>a[1]-b[1]||a[0]-b[0])) : ed.orig;
+      const b = {...bal(n), num:n, schema:val}; S.balises[n] = b; render();
+      try{ await putDoc("balises","b"+n, b); toast(`Schéma de la balise ${n} enregistré`) }catch(e){} break }
+    case "eval-set": { const cid = UI.evalClasse && S.classes.find(c=>c.id===UI.evalClasse) ? UI.evalClasse : S.classes[0].id;
+      const cur = clone(S.evals[cid] || {id:cid, obs:{}}); cur.obs = cur.obs || {}; const o = cur.obs[ds.e] = cur.obs[ds.e] || {};
+      const l = +ds.l; if(o[ds.r]===l) delete o[ds.r]; else o[ds.r] = l;
+      S.evals[cid] = cur; render(); try{ await putDoc("evals", cid, cur) }catch(e){} break }
+    case "eval-copy": { const cid = UI.evalClasse && S.classes.find(c=>c.id===UI.evalClasse) ? UI.evalClasse : S.classes[0].id; const cl = S.classes.find(c=>c.id===cid); const C = CYCLES[classCycle(cl)];
+      const head = ["Élève","Efficacité /10",...C.rubs.map(r=>`${r.nom} /${r.pts}`),"Total /20","Niveau"].join("\t");
+      const rows = cl.eleves.slice().sort((a,b)=>a.localeCompare(b,"fr")).map(e=>{ const n = noteEleve(cl,e); return [e, n.ef?fmtPts(Math.round(n.ef.pts*100)/100):"", ...n.rubs.map(r=>r.l?fmtPts(r.pts):""), n.complete?fmtPts(n.total):"", n.complete?LEVELS[n.lv]:"incomplet"].join("\t") });
+      const tsv = [head, ...rows].join("\n");
+      try{ await navigator.clipboard.writeText(tsv); toast("Notes copiées : colle-les dans ton tableur") }catch(e){ toast("Copie refusée par le navigateur") } break }
+    case "compte": openModal(modalCompte()); break;
+    case "reload": location.reload(); break;
+    case "auth-view": AUTH.view = ds.v; AUTH.err = ""; AUTH.info = ""; render(); break;
+    case "logout": closeModal(); try{ await firebase.auth().signOut() }catch(e){} toast("Déconnecté"); break;
+    case "install": if(deferredInstall){ deferredInstall.prompt(); try{ await deferredInstall.userChoice }catch(e){} deferredInstall = null; renderModal() } break;
+    case "backup-export": { const blob = new Blob([JSON.stringify(backupObject(), null, 1)], {type:"application/json"});
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `sauvegarde-co-vidal-${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove() }, 1000); toast("Sauvegarde téléchargée"); break }
+    case "export": { const nums = Object.keys(GEO).map(Number).sort((a,b)=>a-b);
+      const tsv = ["Balise\tCode poteau\tCode pince\tAnimal\tSigle\tSchéma\tIsolement\tActive\tRemarque"].concat(nums.map(n=>{ const b=bal(n); return [n,b.poteau||"",b.pince||"",b.animal||"",b.sigle||"",b.schema||"",iso(n),isActive(n)?"oui":"non",b.remarque||""].join("\t") })).join("\n");
+      try{ await navigator.clipboard.writeText(tsv); toast("Tableau copié : colle-le dans Google Sheets") }catch(e){ const t=document.getElementById("imp"); t.value=tsv; t.select(); toast("Tableau placé dans la zone de texte : copie-le") } break }
+  }
+});
+document.addEventListener("keydown", ev=>{ const el = ev.target; if((ev.key==="Enter"||ev.key===" ") && el.getAttribute && el.getAttribute("role")==="button" && el.dataset.act){ ev.preventDefault(); el.click() } });
+function rerenderWiz(){ if(UI.modalWiz) renderModal(); else render() }
+
+document.addEventListener("change", async ev=>{
+  const el = ev.target; const a = el.dataset.act, ds = el.dataset; if(!a) return;
+  if(a==="draft-classe"){ Object.assign(UI.draft, {classeId:el.value, groupes:null, pool:[], sel:null, mode:null}); render() }
+  else if(a==="draft-taille"){ UI.draft.taille = +el.value; if(UI.draft.groupes && UI.draft.mode==="hasard"){ const cl=S.classes.find(c=>c.id===UI.draft.classeId); UI.draft.groupes = drawGroups(cl.eleves, UI.draft.taille) } render() }
+  else if(a==="wiz-groupsel"){ UI.wiz.groupId = el.value; if(UI.wiz.step===3) UI.wiz.step = 2; rerenderWiz() }
+  else if(a==="suivi-classe"){ UI.suiviClasse = el.value; render() }
+  else if(a==="eval-classe"){ UI.evalClasse = el.value; render() }
+  else if(a==="b-active"||a==="b-iso"||a==="b-field"){
+    const n = +ds.b; const b = {...bal(n), num:n};
+    if(a==="b-active") b.actif = el.checked; else if(a==="b-iso") b.iso = +el.value; else b[ds.k] = el.value.trim();
+    S.balises[n] = b; if(a==="b-active"){ el.closest("tr").classList.toggle("off", !el.checked) }
+    try{ await putDoc("balises","b"+n, b); toast(`Balise ${n} enregistrée`) }catch(e){}
+  }
+});
+
+/* ================= Chronos ================= */
+function tick(){ document.querySelectorAll("[data-start]").forEach(el=>{ const t = Date.now() - +el.dataset.start; el.textContent = fmtTime(t); const c = +el.dataset.cible; if(c){ el.classList.toggle("over", t > c); el.classList.toggle("warn", t <= c && t > .8*c) } }) }
+setInterval(tick, 500);
+try{ navigator.wakeLock && navigator.wakeLock.request("screen").catch(()=>{}) }catch(e){}
+
+let toastT;
+function toast(t){ let el = document.querySelector(".toast"); if(!el){ el = document.createElement("div"); el.className="toast"; el.setAttribute("role","status"); document.body.appendChild(el) } el.textContent = t; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(()=>{ el.hidden = true }, 2600) }
+
+boot();
+if("serviceWorker" in navigator){ window.addEventListener("load", ()=>{ navigator.serviceWorker.register("sw.js").catch(e=>console.warn("Service worker :", e)) }) }
+</script>
+
+</body>
+</html>
